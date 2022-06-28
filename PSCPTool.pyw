@@ -8,8 +8,7 @@ import threading
 import time
 import tkinter as tk
 from ipaddress import ip_address
-from tkinter import filedialog, ttk
-
+from tkinter import filedialog, messagebox, ttk
 from pexpect import EOF, TIMEOUT, popen_spawn
 from PIL import Image, ImageTk
 from pyperclip import copy, paste
@@ -17,6 +16,20 @@ from pyperclip import copy, paste
 __author__ = "Menno van Heerde"
 __version__ = "1.0.1"
 __status__ = "Production"
+
+
+def alert(header, message, icon, default='no'):
+    try:
+        pop_up = tk.Tk()
+        pop_up.withdraw()
+        if icon == 'error':
+            result = messagebox.showerror(header, message, icon=icon)
+        else:
+            result = messagebox.askquestion(header, message, icon=icon, default=default)
+        pop_up.destroy()
+    except Exception as e:
+        result = 2
+    return result
 
 
 def validate_ip(IP: str) -> str:
@@ -82,37 +95,37 @@ class windows(tk.Tk):
         self.set_timeout.set('0:02:30')
 
         self.remote_host_label = ttk.Label(self, text='Remote host IP address or FQDN')
-        self.remote_host = ttk.Entry(self, show='', foreground='black')
+        self.remote_host = ttk.Entry(self, show='', foreground='Black')
 
         self.remote_host_port_label = ttk.Label(self, text='Port')
-        self.remote_host_port = ttk.Entry(self, show='', foreground='black')
+        self.remote_host_port = ttk.Entry(self, show='', foreground='Black')
         self.remote_host_port.insert(0, 22)
 
         self.remote_host_username_label = ttk.Label(self, text='Remote host username')
-        self.remote_host_username = ttk.Entry(self, show='', foreground='black')
+        self.remote_host_username = ttk.Entry(self, show='', foreground='Black')
         self.remote_host_password_label = ttk.Label(self, text='Remote host password')
-        self.remote_host_password = ttk.Entry(self, show='*', foreground='black')
+        self.remote_host_password = ttk.Entry(self, show='*', foreground='Black')
 
         self.putty_private_key_label = ttk.Label(self, text='Putty Private Key (PPK)')
-        self.putty_private_key = ttk.Entry(self, show='', foreground='black')
+        self.putty_private_key = ttk.Entry(self, show='', foreground='Black')
 
         self.remote_label = ttk.Label(self, text='Remote path of file or directory')
-        self.remote_folder = ttk.Entry(self, show='', foreground='black')
+        self.remote_folder = ttk.Entry(self, show='', foreground='Black')
 
         self.local_label = ttk.Label(self, text='Local path of file or directory')
-        self.local_folder = ttk.Entry(self, show='', foreground='black')
+        self.local_folder = ttk.Entry(self, show='', foreground='Black')
         
         self.local_folder.insert(0, set_basepath())
     
-        self.file_button = tk.Button(self.local_folder, image=self.fileImage, command=self.set_file_path, cursor='hand2')
-        self.folder_button = tk.Button(self.local_folder, image=self.folderImage, command=self.set_folder_path, cursor='hand2')
-        self.ppk_button = tk.Button(self.putty_private_key, image=self.keyImage, command=self.set_key_path, cursor='hand2')
-        self.button = ttk.Button(self, text='Run program', command=self.run, state='disabled')
+        self.file_button = tk.Button(self, image=self.fileImage, command=self.set_file_path, cursor='hand2', takefocus=0)
+        self.folder_button = tk.Button(self, image=self.folderImage, command=self.set_folder_path, cursor='hand2', takefocus=0)
+        self.ppk_button = tk.Button(self, image=self.keyImage, command=self.set_key_path, cursor='hand2', takefocus=0)
+        self.button = ttk.Button(self, text='Download item(s)', command=self.run, state='disabled', takefocus=0)
 
         self.status_label = ttk.Label(self, text='', foreground='RoyalBlue3', anchor=tk.CENTER)
 
         columns = ['Time', 'Action', 'File or folder', 'Status']
-        self.downloaded = ttk.Treeview(self, show='headings', columns=columns, height='6', selectmode='browse')
+        self.downloaded = ttk.Treeview(self, show='headings', columns=columns, height='6', selectmode='browse', takefocus=0)
 
         for k in columns:
             self.downloaded.heading(column=f'{k}', text=f'{k}',anchor='w')
@@ -142,7 +155,6 @@ class windows(tk.Tk):
         self.local_folder.bind('<Button-3>', lambda event: self.copy_paste_pass(event, 'Local path'))
         self.putty_private_key.bind('<Button-3>', lambda event: self.copy_paste_pass(event, 'PuTTY PPK'))
 
-
         self.remote_host.bind('<Return>', self.run)
         self.local_folder.bind('<Return>', self.run)
         self.remote_host_port.bind('<Return>', self.run)
@@ -164,15 +176,13 @@ class windows(tk.Tk):
         self.remote_host_port.place(x=295, y=62, width=100)
 
         self.remote_host_username_label.place(x=5, y=86, width=195)
-        self.remote_host_username.place(x=5, y=104, width=194)
-        self.remote_host_password_label.place(x=200, y=86, width=195)
-        self.remote_host_password.place(x=200, y=104, width=195)
-
+        self.remote_host_username.place(x=5, y=104, width=195)
+        self.remote_host_password_label.place(x=200.5, y=86, width=194)
+        self.remote_host_password.place(x=200.5, y=104, width=194)
 
         self.putty_private_key_label.place(x=5, y=128, width=390)
         self.putty_private_key.place(x=5, y=146, width=390)
-        self.ppk_button.place(x=370, y=1, width=19, height=19)
-
+        self.ppk_button.place(x=376, y=128, width=19, height=19)
 
         self.remote_label.place(x=5, y=170, width=390)
         self.remote_folder.place(x=5, y=188, width=390)
@@ -180,12 +190,10 @@ class windows(tk.Tk):
         self.local_label.place(x=5, y=212, width=390)
         self.local_folder.place(x=5, y=230, width=390)
 
-        # self.file_button.place(x=5, y=262, width=71.5)
-        # self.folder_button.place(x=76.5, y=262, width=71.5)
-        self.file_button.place(x=350, y=1, width=19, height=19)
-        self.folder_button.place(x=370, y=1, width=19, height=19)
+        self.file_button.place(x=357, y=212, width=19, height=19)
+        self.folder_button.place(x=376, y=212, width=19, height=19)
 
-        self.button.place(x=251, y=262, width=144)
+        self.button.place(x=200.5, y=260, width=195)
 
         self.downloaded.place(x=5, y=294, width=390)
         device_scrollbar.place(x=377, y=295, height=145)
@@ -289,7 +297,7 @@ class windows(tk.Tk):
         path = self.putty_private_key.get()
         filepath=filedialog.askopenfile(initialdir=set_basepath(path), filetypes=[('PuTTY Private Key files', '*.ppk')], title="Select PuTTY PPK file")
         if not filepath:
-            filepath = set_basepath()
+            filepath = path if os.path.isfile(path) else ''
         else:
             filepath = filepath.name
         self.putty_private_key.delete(0, 'end')
@@ -341,6 +349,7 @@ class windows(tk.Tk):
             self.remote_label.config(foreground='Black')
             self.local_label.config(background='SystemButtonFace')
             self.local_label.config(foreground='Black')
+            self.button['text'] = 'Download item(s)'
         else:
             self.configure(background='Firebrick1')
             self.select_label.config(background='Firebrick1')
@@ -363,6 +372,7 @@ class windows(tk.Tk):
             self.remote_label.config(foreground='White')
             self.local_label.config(background='Firebrick1')
             self.local_label.config(foreground='White')
+            self.button['text'] = 'Upload item(s)'
         self.validate_local_path()
         self.validate_input()
 
@@ -521,9 +531,12 @@ class windows(tk.Tk):
         try: rhp = int(rhp)
         except: pass
         
-        rf_check = 0 if self.select.get() == 'Download from remote host' and len(rf) == 0 else 1
+        action = self.select.get()
+        
+        action = 'Download' if self.select.get() == 'Download from remote host' else 'Upload'
+        rf_check = 0 if action == 'Download' and len(rf) == 0 else 1
 
-        if self.select.get() == 'Upload to remote host':
+        if action == 'Upload':
             if os.path.isfile(lf) or os.path.isdir(lf):
                 path = 1
             else:
@@ -546,25 +559,35 @@ class windows(tk.Tk):
             self.button['text'] = 'Running'
             self.update()
 
-            if len(key_path) > 0:
-                if os.path.isfile(key_path):
-                    key_path = f'-i {key_path}'
+            if len(kp) > 0:
+                if os.path.isfile(kp):
+                    kp = f'-i {kp}'
                 else:
-                    key_path = ''
+                    kp = ''
 
+            if action == 'Upload':
+                result = alert('Please confirm', f'Attention! You are going to upload items to the remote host!\nDo you want to continue?', 'warning')
+                if not result or result in ['no', 2]:
+                    file = os.path.basename(lf)
+                    tm = dt.datetime.now().strftime('%H:%M:%S')
+                    self.downloaded.insert('', 'end', values=(tm, action, file, 'Aborted',))
+                    self.button['text'] = 'Upload item(s)'
+                    self.button['state'] = 'normal'
+                    self.update()
+                    return
+                    
             encoding = 'utf-8'
             timeout = convert_to_seconds(self.set_timeout.get())
             condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory', 'Too many failures', 'Cannot assign requested address', 'nvalid', 'ncorrect', 'diffie', 'cache?', 'key to continue', 'begin', 'ser: ', 'sername: ', 'ogin: ', 'ogin as: ', "ssword:", 'phrase', '100%']
             action_list = [0, 0, 0, 0, 0, 0, 0, 0, 'y', 'n', '\n', '\n', un, un, un, un, pw, pw, 0]
 
             self.error = [rh, rf, '']
-            action = 'Download' if self.select.get() == 'Download from remote host' else 'Upload'
             if action == 'Download':          
                 file = os.path.basename(rf)
-                self.session = popen_spawn.PopenSpawn(f'{self.pscp} {key_path} -scp -r -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout)
+                self.session = popen_spawn.PopenSpawn(f'{self.pscp} {kp} -scp -r -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout)
             else:
                 file = os.path.basename(lf)
-                self.session = popen_spawn.PopenSpawn(f'{self.pscp} {key_path} -scp -r -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
+                self.session = popen_spawn.PopenSpawn(f'{self.pscp} {kp} -scp -r -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
             self.send_on_condition([condition_list, action_list])
 
             err = str(self.error[2])
@@ -588,7 +611,7 @@ class windows(tk.Tk):
             
         try: self.downloaded.see(self.downloaded.get_children()[-1])
         except: pass
-        self.button['text'] = 'Run program'
+        self.button['text'] = 'Upload item(s)' if action == 'Upload' else 'Download item(s)'
         self.update()
         
 
@@ -646,5 +669,6 @@ if __name__ == '__main__':
     app.option_add('*TCombobox*Listbox.background', 'Turquoise1')
     app.attributes('-topmost', True)
     app.attributes('-topmost', False)
+    app.remote_host.focus_force()
     app.resizable(0,0)
     app.mainloop()

@@ -13,6 +13,16 @@ from pexpect import EOF, TIMEOUT, popen_spawn
 from PIL import Image, ImageTk
 from pyperclip import copy, paste
 
+# hide python console window (.pyw extension breaks functionality)
+try:
+    import win32gui, win32con;
+    frgrnd_wndw = win32gui.GetForegroundWindow();
+    wndw_title  = win32gui.GetWindowText(frgrnd_wndw);
+    if wndw_title.endswith("py.exe") or wndw_title.endswith("python.exe"):
+        win32gui.ShowWindow(frgrnd_wndw, win32con.SW_HIDE)
+except:
+    pass
+
 __author__ = "Menno van Heerde"
 __version__ = "1.0.1"
 __status__ = "Production"

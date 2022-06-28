@@ -1,0 +1,12 @@
+# run the following command(s) in CMD to install the required modules:
+# the quickest way is to update the path to requirements.txt (note the double quotes!):
+#     python -m pip install -r "path\to\requirements.txt"
+
+# the alternative way is to change the directory of CMD to the path of the requirements file
+# 	cd /d "path\to\requirements.txt"
+# 	python -m pip install -r requirements.txt
+
+pip>=22.1.1
+pexpect==4.8.0
+Pillow>=9.0.0
+pyperclip==1.8.2

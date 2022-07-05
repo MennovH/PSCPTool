@@ -13,6 +13,10 @@ from pexpect import EOF, TIMEOUT, popen_spawn
 from PIL import Image, ImageTk
 from pyperclip import copy, paste
 
+__author__ = "Menno van Heerde"
+__version__ = "1.0.2"
+__status__ = "Production"
+
 # hide python console window (.pyw extension breaks functionality)
 try:
     import win32gui, win32con;
@@ -22,10 +26,6 @@ try:
         win32gui.ShowWindow(frgrnd_wndw, win32con.SW_HIDE)
 except:
     pass
-
-__author__ = "Menno van Heerde"
-__version__ = "1.0.1"
-__status__ = "Production"
 
 
 def alert(header, message, icon, default='no'):
@@ -67,22 +67,19 @@ def convert_to_seconds(timestamp):
         m=int(m)*60
         s=int(s)
     except:
-        return 0
+        return 150
     return s+m+h
 
 
 def set_basepath(path=None):
     # set local path
     if path is not None:
-        if os.path.isdir(path) or os.path.isfile(path):
+        if (os.path.isdir(path) or os.path.isfile(path)) and path is not None:
             # return current path value
             return path
-    if hasattr(sys, 'frozen'):
-        # return the path of the compile
-        return os.path.split(sys.executable)[0]
-    else:
-        # return the path of the script
-        return os.path.dirname(os.path.realpath(__file__))
+    
+    # return the path of the compile if compiled else return path of script
+    return os.path.split(sys.executable)[0] if hasattr(sys, 'frozen') else os.path.dirname(os.path.realpath(__file__))
 
 
 class windows(tk.Tk):
@@ -94,15 +91,23 @@ class windows(tk.Tk):
         self.startupinfo.dwFlags = sp.CREATE_NEW_CONSOLE | sp.STARTF_USESHOWWINDOW
         self.startupinfo.wShowWindow = sp.SW_HIDE
         
-        # locate PSCP in native directory
-        self.pscp = sp.check_output('where /r "c:\program files\" pscp', startupinfo=self.startupinfo)
-        if self.pscp:
-            self.pscp = self.pscp.decode().replace('\r', '').replace('\n', '')
-        
-        # set GUI layout including controls
-        self.wm_title("PSCPTool")
-        self.geometry('400x446')        
+        try:
+            # locate PSCP in native directory
+            self.pscp = sp.check_output('where /r "c:\program files\" pscp', startupinfo=self.startupinfo)
+            if self.pscp:
+                self.pscp = self.pscp.decode().replace('\r', '').replace('\n', '')
+        except:
+            if os.path.isfile(r'..\PuTTY\pscp.exe'):
+                self.pscp = r'..\PuTTY\pscp.exe'
+            else:
+                self.pscp = 'pscp.exe'
 
+        # set GUI layout including controls
+        self.wm_title(f"PSCPTool - v{__version__}")
+        self.geometry('400x446')        
+        self.icon = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00 \x00\x00\x00 \x08\x06\x00\x00\x00szz\xf4\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x04gAMA\x00\x00\xb1\x8f\x0b\xfca\x05\x00\x00\x00\tpHYs\x00\x00\x0e\xc3\x00\x00\x0e\xc3\x01\xc7o\xa8d\x00\x00\x01%IDATXG\xc5\x92a\x12\x85 \x08\x84=zG\xebf\xbdV\xc0\xd0\xc1\x12\xa5\xde7\xb3\x93"\xec\xf2\xa3\x14\xc0\xe1T(\xc7\xbe\xef\xc3\xda\xb6-t\x89c\x14\t\x7fe\x81\x94`z\xaf\x0f\x16\xc0\xb7\xaf?,\x90C\xca\xfd\xe3\x05P\xff\xcb\x02\x14\xda\x86C\x1f,@\xc1V8\xf4\xf2\x02\xf8\x92p\xc6\xb5\xd5k\x0b@\x08\x86\xe8lc, \x9a\xe6\xb4\xad\xc3%\xe0N\xe8\xc32@\xee0\xf3R\x82%|T:|f\x81<\xa0\xc3{\xa2>\x9b\xd9\xff\xe1\x1c}\x16\xfa \x84\xf4$\xe1z\x812\xe8U\x1b\xaeC\xda^\xd4\xf4\x02\\\xcf\x9c\x06>h\xa6\x0e\x17\xe3\x11\xa1\x1f\xc1\x02<\xa5X\xd4\x83\xde\xae\xe0IUd\xe3\x11\xa8\xb7\n\x0f\xa1\x98[\x12\xe8\\\x85C!\xe4\x80;\xa8\xa7^\x8a\xcf!dC\x01w]\xa3s]\x03\xdc\x17\x02[\xda\xe0\xdd\xea\xe1z\x08ly\x85\x89\xee\xe0\x9e\x10\xd8\xd2\x07\xe6h|\x1dm\xf8(\x81\xef!\xb0\xa5\x0f\xcc\xd1\xf8:\xda\xd0\x94\x05\xbf\x85\xc0\x96>0G\xe3\xeb\xb0\xe5\x05j\x964\\\x0b\x81-}`\x8e\xc6\xd7\x11\xb3\x19-\x92\xd2\x0f\xd8F0uC\xc6\x9b\x88\x00\x00\x00\x00IEND\xaeB`\x82')))
+        self.iconphoto(False, self.icon)
+        
         self.keyImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x11\x08\x06\x00\x00\x00\xd0Z\xfc\xf9\x00\x00\x01SIDAT8Ocd\xa0\x12`\xa4\x929\x0c\x03c\x90|\xc9N\'\xc6\x7f\xffK\x81\xbe\xf0\xf8\xcf\xf0\x7f\xc9\xc3>\xcfX\x98\x8f\x88v\x91B\xe1\xf6\x08\x06\x06\xc6R\xa0\x1f\x8c\xa0\x9a\'<\xe8\xf3($\xc9 \x85\xa2\xed\t\xff\x19\x18g\x03me\x01j|\xc1\xf0\xef\x7f$\x90~\xf0`\x82\xe7\x03\xbc\x06I\xe7n\x93aec\xe6y\xd0\xeb~C\xbexg3\xe3\xff\xff5@\r?\x18\xfe3\x9c\xf8\xcf\xc4\xf8\xe6a\xaf{(z$\xa1x\rd\x00\x0b\x1bs?\xc3\xff\xff\x01P\xdb\xe1\xea\xff30\x1cy\xd8\xe7a\x8b+\x96\x11\x065\xecgQ\xf8\xfc\xf34\xd0V\x03t\xc5@C\xbe\xfc\xff\xf7/\xf1\xd1\x04\xaf5\x04\r\x92+\xdc\xe1\xc2\xc4\xc8\xb0\x1b\xa8\xe9\x0f\xd0\xf4;@\r\x1a0M\xff\x19\x19[\x80\xde\xa9\xc5\x97\xe6\xe0.\x02\x05(0V\xe630\xfc+|\xd0\xe75A\xa1x\xe7r\xa0\x17\x811\x05\x02\x8c\r\x0f\xfa\xdc\x1b\x892H\xaex\xbb\r\xd3\x7f\xc6\xc3\xc0\xd8Y\xf2\x8f\x89\xa1\x93\xf9\xff\xff\xc5po\xfeg\xf0|\xd0\xef\xb1\x83(\x83@\x8a\x801\xb4\x1a\x18C!\xc8\x1a\x80\xdeZ\x83-\x96\xf0\xc6\x1a\xd8\xb0\xc2\x1d9\x8c\x8c\x0c\xde\xe0\xb0\xfa\xcf\xb0\xf5\x01?\xfb\x1c\x86\x06\xc7?\x84\xf2$\xd1){\xe8\x19\x04\x00\xc2\x1eq\x12n\xc2\xbf\xe5\x00\x00\x00\x00IEND\xaeB`\x82")))
         self.fileImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x0f\x08\x06\x00\x00\x00;\xd6\x95J\x00\x00\x00BIDAT(Scd\x80\x80\xffP\x1a\x1b\xc5\x88K\x0e&AH3H\x1e\xc3\x10R4\x83\x1c\x80b\x00\xa9\x9aQ\x0c V3Vo\x13\xa3\x19g \x8ej\xc6\x93\xcc\xd0\xa4\xc0a5\xc4\x03\x8cx\xdf"\xa9\x04\x00\xdd\xf3\x11\x10)1\x98\xd9\x00\x00\x00\x00IEND\xaeB`\x82')))
         self.folderImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x11\x08\x06\x00\x00\x00\x02\n\xf6\xa1\x00\x00\x00uIDAT8Ocd\xa0\x000R\xa0\x97\x81r\xcdb\r\x7f\x02\xfe\xfd\xfb\xaf\x8f\xee\x8a7M\xac\x8d\xf8\\\x06\xb6Y\xb4\xee\xf7\x7fl\x8a^7\xb1\xe2u\x19^\xcd@\x13\x1b\xb0\x19\ns\x11^\xcd\xb8\x9c\xcc\xc8\xc8\xf8\xebU#\x0b;Y\x9aA\x86\x82\xbc4\xaa\x99\x84\xb4Jv\x80\x01\xe3\xff\x170\xae!Q%\\\xf7\xc7\x9f\x91\xe1\xbf\x01\xb1\x16\xa3$\x12b5\xa1\xab\xa3(W\x01\x00\xbe\x929\x12yk_\xb3\x00\x00\x00\x00IEND\xaeB`\x82')))
@@ -134,6 +139,8 @@ class windows(tk.Tk):
         self.remote_folder = ttk.Entry(self, show='', foreground='Black')
 
         self.local_label = ttk.Label(self, text='Local path of file or directory')
+        self.local_label_item = ttk.Label(self, text='Directory set')
+        self.local_label_item.config(foreground='RoyalBlue3')
         self.local_folder = ttk.Entry(self, show='', foreground='Black')
         
         self.local_folder.insert(0, set_basepath())
@@ -141,7 +148,14 @@ class windows(tk.Tk):
         self.file_button = tk.Button(self, image=self.fileImage, command=self.set_file_path, cursor='hand2', takefocus=0)
         self.folder_button = tk.Button(self, image=self.folderImage, command=self.set_folder_path, cursor='hand2', takefocus=0)
         self.ppk_button = tk.Button(self, image=self.keyImage, command=self.set_key_path, cursor='hand2', takefocus=0)
+        
+        self.style = ttk.Style()
+        self.style.configure('TButton', foreground='black')
         self.run_button = ttk.Button(self, text='Download item(s)', command=self.run, state='disabled', takefocus=0)
+
+        self.checkbox_var = tk.IntVar(value=1)
+
+        self.recursive_checkbox = ttk.Checkbutton(self, text='Recursive', variable=self.checkbox_var, onvalue=1, offvalue=0)
 
         self.status_label = ttk.Label(self, text='', foreground='RoyalBlue3', anchor=tk.CENTER)
 
@@ -182,6 +196,7 @@ class windows(tk.Tk):
         self.remote_host_username.bind('<Return>', self.run)
         self.remote_host_password.bind('<Return>', self.run)
         self.remote_folder.bind('<Return>', self.run)
+        self.recursive_checkbox.bind('<Return>', self.run)
 
         # set placement of controls
         self.action_selection_label.place(x=5, y=2, width=289)
@@ -208,12 +223,14 @@ class windows(tk.Tk):
         self.remote_label.place(x=5, y=170, width=390)
         self.remote_folder.place(x=5, y=188, width=390)
 
-        self.local_label.place(x=5, y=212, width=390)
+        self.local_label.place(x=5, y=212, width=195)
+        self.local_label_item.place(x=200.5, y=212, width=194)
         self.local_folder.place(x=5, y=230, width=390)
 
         self.file_button.place(x=357, y=212, width=19, height=19)
         self.folder_button.place(x=376, y=212, width=19, height=19)
 
+        self.recursive_checkbox.place(x=5, y=262, width=195)
         self.run_button.place(x=200.5, y=260, width=195)
 
         self.log.place(x=5, y=294, width=390)
@@ -354,53 +371,13 @@ class windows(tk.Tk):
 
 
     def action_selection_warning(self, param=None):
-        # update colors on action selection
+        # color button based on dropdown selection
         if self.action_selection.get() == 'Download from remote host':
-            self.configure(background='SystemButtonFace')
-            self.action_selection_label.config(background='SystemButtonFace')
-            self.action_selection_label.config(foreground='Black')
-            self.status_label.config(background='SystemButtonFace')
-            self.status_label.config(foreground='RoyalBlue3')
-            self.set_timeout_label.config(background='SystemButtonFace')
-            self.set_timeout_label.config(foreground='Black')
-            self.remote_host_label.config(background='SystemButtonFace')
-            self.remote_host_label.config(foreground='Black')
-            self.remote_host_port_label.config(background='SystemButtonFace')
-            self.remote_host_port_label.config(foreground='Black')
-            self.remote_host_username_label.config(background='SystemButtonFace')
-            self.remote_host_username_label.config(foreground='Black')
-            self.remote_host_password_label.config(background='SystemButtonFace')
-            self.remote_host_password_label.config(foreground='Black')
-            self.putty_private_key_label.config(background='SystemButtonFace')
-            self.putty_private_key_label.config(foreground='Black')
-            self.remote_label.config(background='SystemButtonFace')
-            self.remote_label.config(foreground='Black')
-            self.local_label.config(background='SystemButtonFace')
-            self.local_label.config(foreground='Black')
             self.run_button['text'] = 'Download item(s)'
+            self.style.configure('TButton', foreground='Black')
         else:
-            self.configure(background='Firebrick1')
-            self.action_selection_label.config(background='Firebrick1')
-            self.action_selection_label.config(foreground='White')
-            self.status_label.config(background='Firebrick1')
-            self.status_label.config(foreground='Yellow')
-            self.set_timeout_label.config(background='Firebrick1')
-            self.set_timeout_label.config(foreground='White')
-            self.remote_host_label.config(background='Firebrick1')
-            self.remote_host_label.config(foreground='White')
-            self.remote_host_port_label.config(background='Firebrick1')
-            self.remote_host_port_label.config(foreground='White')
-            self.remote_host_username_label.config(background='Firebrick1')
-            self.remote_host_username_label.config(foreground='White')
-            self.remote_host_password_label.config(background='Firebrick1')
-            self.remote_host_password_label.config(foreground='White')
-            self.putty_private_key_label.config(background='Firebrick1')
-            self.putty_private_key_label.config(foreground='White')
-            self.remote_label.config(background='Firebrick1')
-            self.remote_label.config(foreground='White')
-            self.local_label.config(background='Firebrick1')
-            self.local_label.config(foreground='White')
             self.run_button['text'] = 'Upload item(s)'
+            self.style.configure('TButton', foreground='Red')
         self.validate_local_path()
         self.validate_input()
 
@@ -486,9 +463,21 @@ class windows(tk.Tk):
         try: rhp = int(rhp)
         except: pass
         
-        rf_check = 0 if self.action_selection.get() == 'Download from remote host' and len(rf) == 0 else 1
+        action = 'Download' if self.action_selection.get() == 'Download from remote host' else 'Upload'
+        rf_check = 0 if action == 'Download' and len(rf) == 0 else 1
 
-        if self.action_selection.get() == 'Upload to remote host':
+        if os.path.isdir(lf):
+            self.local_label_item.config(text = 'Directory set')
+        elif os.path.isfile(lf):
+            self.local_label_item.config(text = 'File set')
+        elif action == 'Upload':
+            self.local_label_item.config(text = 'Nothing set')
+        elif (os.path.isdir(os.path.dirname(lf)) and \
+                not os.path.isfile(lf) and \
+                not os.path.isdir(lf)) or (os.path.isdir(lf) or os.path.isfile(lf)):
+            self.local_label_item.config(text = 'Nonexistent item set')
+
+        if action == 'Upload':
             if os.path.isfile(lf) or os.path.isdir(lf):
                 path = 1
             else:
@@ -530,21 +519,39 @@ class windows(tk.Tk):
 
     def validate_local_path(self, param=None):
         # validate local path
+        action = 'Download' if self.action_selection.get() == 'Download from remote host' else 'Upload'
         path = self.local_folder.get()
-        if self.action_selection.get() == 'Upload to remote host':
+        if action == 'Upload':
             if len(path) > 0:
-                if os.path.isfile(path) or os.path.isdir(path):
+                if os.path.isfile(path):
                     self.local_folder.config(foreground='Black')
+                    self.local_label_item.config(text='File set')
+                    self.local_label_item.config(foreground='RoyalBlue3')
+                    self.run_button['state'] = 'normal'
+                elif os.path.isdir(path):
+                    self.local_folder.config(foreground='Black')
+                    self.local_label_item.config(text='Directory set')
+                    self.local_label_item.config(foreground='RoyalBlue3')
+                    self.run_button['state'] = 'normal'
                 else:
                     self.local_folder.config(foreground='Red')
+                    self.local_label_item.config(text='Nothing set')
+                    self.local_label_item.config(foreground='Red')
+                    self.run_button['state'] = 'disabled'
         else:
             if len(path) > 0:
                 if (os.path.isdir(os.path.dirname(path)) and \
                     not os.path.isfile(path) and \
                     not os.path.isdir(path)) or (os.path.isdir(path) or os.path.isfile(path)):
                     self.local_folder.config(foreground='Black')
+                    self.local_label_item.config(text='File set' if os.path.isfile(path) else 'Directory set' if os.path.isdir(path) else 'Nonexistent item set')
+                    self.local_label_item.config(foreground='RoyalBlue3')
+                    self.run_button['state'] = 'normal'
                 else:
                     self.local_folder.config(foreground='Red')
+                    self.local_label_item.config(text='Nothing set')
+                    self.local_label_item.config(foreground='Red')
+                    self.run_button['state'] = 'disabled'
 
 
     def run(self, param=None):
@@ -559,6 +566,7 @@ class windows(tk.Tk):
         pw = self.remote_host_password.get()
         lf = self.local_folder.get()
         kp = self.putty_private_key.get()
+        rs = self.checkbox_var.get()
 
         try: rhp = int(rhp)
         except: pass
@@ -589,11 +597,7 @@ class windows(tk.Tk):
             self.run_button['text'] = 'Running'
             self.update()
 
-            if len(kp) > 0:
-                if os.path.isfile(kp):
-                    kp = f'-i {kp}'
-                else:
-                    kp = ''
+            kp = f'-i {kp}' if os.path.isfile(kp) else ''
             
             # if action equals upload, prompt user for confirmation
             if action == 'Upload':
@@ -618,22 +622,22 @@ class windows(tk.Tk):
             # start pexpect process
             self.error = ''
             tm = dt.datetime.now().strftime('%H:%M:%S')
+            recursive = '-r' if rs else ''
             if action == 'Download':          
                 file = os.path.basename(rf)
-                self.session = popen_spawn.PopenSpawn(f'{self.pscp} {kp} -scp -r -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout)
+                self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout)
             else:
                 file = os.path.basename(lf)
-                self.session = popen_spawn.PopenSpawn(f'{self.pscp} {kp} -scp -r -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
+                self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
             
             # handle pexpect feedback
-            condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory', 'Too many failures', 'Cannot assign requested address', 'nvalid', 'ncorrect', 'diffie', 'cache?', 'key to continue', 'begin', 'ser: ', 'sername: ', 'ogin: ', 'ogin as: ', "ssword:", 'phrase', '100%', EOF, TIMEOUT]
-            action_list = [0, 0, 0, 0, 0, 0, 0, 0, 'y', 'n', '\n', '\n', un, un, un, un, pw, pw, 0, 0, 0]
+            condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory', 'Too many failures', 'Cannot assign requested address', 'nvalid', 'ncorrect', 'diffie', 'cache?', 'key to continue', 'begin', 'ser: ', 'sername: ', 'ogin: ', 'ogin as: ', "ssword:", 'phrase', '100%', '-p -r -d options not supported', EOF, TIMEOUT]
+            action_list = [0, 0, 0, 0, 0, 0, 0, 0, 'y', 'n', '\n', '\n', un, un, un, un, pw, pw, 0, 0, 0, 0]
             self.send_on_condition([condition_list, action_list])
 
             # parse feedback
             err = str(self.error)
-            err = '0%; EOF' if 'EOF' in err else 'Address error' if 'Cannot assign requested address' in err else 'Timeout' if 'TIMEOUT' in err else 'Item not found' if err == 'No such file or directory' else err
-            
+            err = '0%; EOF' if 'EOF' in err else 'Address error' if 'Cannot assign requested address' in err else 'Timeout' if 'TIMEOUT' in err else 'Item not found' if err == 'No such file or directory' else 'Failed to recurse' if '-p -r -d options not supported' in err else err
             
             if action == 'Download' and err == '100%':
                 for _ in range(100):
@@ -678,10 +682,7 @@ class windows(tk.Tk):
                 self.update()
                 time.sleep(0.3)
                 if action_list[index] in [0, 1]:
-                    if action_list[index] == 0:
-                        self.error = condition_list[index]
-                    else:
-                        self.error = f'{self.session.before}{self.session.after}'
+                    self.error = condition_list[index]
                     break
                 else:
                     time.sleep(0.2)

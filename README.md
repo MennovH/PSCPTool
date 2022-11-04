@@ -8,4 +8,4 @@ Even when Python is not installed, it is still possible to use this GUI, by simp
 
 ![PSCP GUI][screenshot]
 
-[screenshot]: https://raw.githubusercontent.com/MennovH/PSCPTool/main/images/screenshot.png
+[screenshot]: https://raw.githubusercontent.com/MennovH/PSCPTool/main/images/PSCP.png

@@ -7,6 +7,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+import webbrowser as wb
 from ipaddress import ip_address
 from tkinter import filedialog, messagebox, ttk
 from pexpect import EOF, TIMEOUT, popen_spawn
@@ -19,7 +20,8 @@ __status__ = "Production"
 
 # hide python console window (.pyw extension breaks functionality)
 try:
-    import win32gui, win32con;
+    import win32con
+    import win32gui
     frgrnd_wndw = win32gui.GetForegroundWindow();
     wndw_title  = win32gui.GetWindowText(frgrnd_wndw);
     if wndw_title.endswith("py.exe") or wndw_title.endswith("python.exe"):
@@ -107,10 +109,11 @@ class windows(tk.Tk):
         self.geometry('400x446')        
         self.icon = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00 \x00\x00\x00 \x08\x06\x00\x00\x00szz\xf4\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x04gAMA\x00\x00\xb1\x8f\x0b\xfca\x05\x00\x00\x00\tpHYs\x00\x00\x0e\xc3\x00\x00\x0e\xc3\x01\xc7o\xa8d\x00\x00\x01%IDATXG\xc5\x92a\x12\x85 \x08\x84=zG\xebf\xbdV\xc0\xd0\xc1\x12\xa5\xde7\xb3\x93"\xec\xf2\xa3\x14\xc0\xe1T(\xc7\xbe\xef\xc3\xda\xb6-t\x89c\x14\t\x7fe\x81\x94`z\xaf\x0f\x16\xc0\xb7\xaf?,\x90C\xca\xfd\xe3\x05P\xff\xcb\x02\x14\xda\x86C\x1f,@\xc1V8\xf4\xf2\x02\xf8\x92p\xc6\xb5\xd5k\x0b@\x08\x86\xe8lc, \x9a\xe6\xb4\xad\xc3%\xe0N\xe8\xc32@\xee0\xf3R\x82%|T:|f\x81<\xa0\xc3{\xa2>\x9b\xd9\xff\xe1\x1c}\x16\xfa \x84\xf4$\xe1z\x812\xe8U\x1b\xaeC\xda^\xd4\xf4\x02\\\xcf\x9c\x06>h\xa6\x0e\x17\xe3\x11\xa1\x1f\xc1\x02<\xa5X\xd4\x83\xde\xae\xe0IUd\xe3\x11\xa8\xb7\n\x0f\xa1\x98[\x12\xe8\\\x85C!\xe4\x80;\xa8\xa7^\x8a\xcf!dC\x01w]\xa3s]\x03\xdc\x17\x02[\xda\xe0\xdd\xea\xe1z\x08ly\x85\x89\xee\xe0\x9e\x10\xd8\xd2\x07\xe6h|\x1dm\xf8(\x81\xef!\xb0\xa5\x0f\xcc\xd1\xf8:\xda\xd0\x94\x05\xbf\x85\xc0\x96>0G\xe3\xeb\xb0\xe5\x05j\x964\\\x0b\x81-}`\x8e\xc6\xd7\x11\xb3\x19-\x92\xd2\x0f\xd8F0uC\xc6\x9b\x88\x00\x00\x00\x00IEND\xaeB`\x82')))
         self.iconphoto(False, self.icon)
-        
+
         self.keyImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x11\x08\x06\x00\x00\x00\xd0Z\xfc\xf9\x00\x00\x01SIDAT8Ocd\xa0\x12`\xa4\x929\x0c\x03c\x90|\xc9N\'\xc6\x7f\xffK\x81\xbe\xf0\xf8\xcf\xf0\x7f\xc9\xc3>\xcfX\x98\x8f\x88v\x91B\xe1\xf6\x08\x06\x06\xc6R\xa0\x1f\x8c\xa0\x9a\'<\xe8\xf3($\xc9 \x85\xa2\xed\t\xff\x19\x18g\x03me\x01j|\xc1\xf0\xef\x7f$\x90~\xf0`\x82\xe7\x03\xbc\x06I\xe7n\x93aec\xe6y\xd0\xeb~C\xbexg3\xe3\xff\xff5@\r?\x18\xfe3\x9c\xf8\xcf\xc4\xf8\xe6a\xaf{(z$\xa1x\rd\x00\x0b\x1bs?\xc3\xff\xff\x01P\xdb\xe1\xea\xff30\x1cy\xd8\xe7a\x8b+\x96\x11\x065\xecgQ\xf8\xfc\xf34\xd0V\x03t\xc5@C\xbe\xfc\xff\xf7/\xf1\xd1\x04\xaf5\x04\r\x92+\xdc\xe1\xc2\xc4\xc8\xb0\x1b\xa8\xe9\x0f\xd0\xf4;@\r\x1a0M\xff\x19\x19[\x80\xde\xa9\xc5\x97\xe6\xe0.\x02\x05(0V\xe630\xfc+|\xd0\xe75A\xa1x\xe7r\xa0\x17\x811\x05\x02\x8c\r\x0f\xfa\xdc\x1b\x892H\xaex\xbb\r\xd3\x7f\xc6\xc3\xc0\xd8Y\xf2\x8f\x89\xa1\x93\xf9\xff\xff\xc5po\xfeg\xf0|\xd0\xef\xb1\x83(\x83@\x8a\x801\xb4\x1a\x18C!\xc8\x1a\x80\xdeZ\x83-\x96\xf0\xc6\x1a\xd8\xb0\xc2\x1d9\x8c\x8c\x0c\xde\xe0\xb0\xfa\xcf\xb0\xf5\x01?\xfb\x1c\x86\x06\xc7?\x84\xf2$\xd1){\xe8\x19\x04\x00\xc2\x1eq\x12n\xc2\xbf\xe5\x00\x00\x00\x00IEND\xaeB`\x82")))
         self.fileImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x0f\x08\x06\x00\x00\x00;\xd6\x95J\x00\x00\x00BIDAT(Scd\x80\x80\xffP\x1a\x1b\xc5\x88K\x0e&AH3H\x1e\xc3\x10R4\x83\x1c\x80b\x00\xa9\x9aQ\x0c V3Vo\x13\xa3\x19g \x8ej\xc6\x93\xcc\xd0\xa4\xc0a5\xc4\x03\x8cx\xdf"\xa9\x04\x00\xdd\xf3\x11\x10)1\x98\xd9\x00\x00\x00\x00IEND\xaeB`\x82')))
         self.folderImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x11\x08\x06\x00\x00\x00\x02\n\xf6\xa1\x00\x00\x00uIDAT8Ocd\xa0\x000R\xa0\x97\x81r\xcdb\r\x7f\x02\xfe\xfd\xfb\xaf\x8f\xee\x8a7M\xac\x8d\xf8\\\x06\xb6Y\xb4\xee\xf7\x7fl\x8a^7\xb1\xe2u\x19^\xcd@\x13\x1b\xb0\x19\ns\x11^\xcd\xb8\x9c\xcc\xc8\xc8\xf8\xebU#\x0b;Y\x9aA\x86\x82\xbc4\xaa\x99\x84\xb4Jv\x80\x01\xe3\xff\x170\xae!Q%\\\xf7\xc7\x9f\x91\xe1\xbf\x01\xb1\x16\xa3$\x12b5\xa1\xab\xa3(W\x01\x00\xbe\x929\x12yk_\xb3\x00\x00\x00\x00IEND\xaeB`\x82')))
+        self.openImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\x00\x00\x00\x1f\xf3\xffa\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\xebIDAT8O\xb5\xd3!KDA\x14\xc5\xf1\xdf\xea\x06\x83k\xb3.\x98\xc4 \xb8\x0b"\x184\x99\xd6h\x144\xdbMZ\x97-\x1b\xd5\x0f\xe0\'P\x14\xb1\xa9q?\x84\xa0\xa0\x18l\x16\r+\xc8\x85\x01\x1f\xf8\x1e;/xa`\x98\xcb\xf9s.\xe7N\xc3oMa\x05\xa7\xe8\xe2\xbb\xd0+^\x9b\xe8\xa73n\xa4\xce4\x961D\x0b\x03\\T\x00\x0e0_\x04\x04d\x11\'\xf8\xc4#\xeep\x99\x0b\x08K\xc7\xd8\xc5\x1b\x9e\x12lT\x07p\x84w\x9cU\x88\x8a\xcf\x7fF\x08\x07e\x80%\xac&\xe5\x18\x0fxE6`\x13{X\xc3\x02vpS\x070\x87\x1e\xd6\xb1\x85C\\\xe5\x02"\xca\xed$\xbe\xc5>\xces\x01\xb3I\xbc\x81k\xdc\xa3\x83g\xbc\xe48h\'\xeb\x11g\x88c7j\xa50\x83\x98\xff\x03_%\xb1f\xa7P\xb5\x12\xff\x07\x88e\x8a\x85\x99T\xa5\xbfq\x92\xa8\xb2\xff\x03y\x93S\x11;;\xbfM\x00\x00\x00\x00IEND\xaeB`\x82')))
 
         self.action_selection_label = ttk.Label(self, text='Action')
         self.action_selection = ttk.Combobox(self, textvariable='', values=['Download from remote host', 'Upload to remote host'], state='readonly')
@@ -145,6 +148,7 @@ class windows(tk.Tk):
         
         self.local_folder.insert(0, set_basepath())
     
+        self.open_button = tk.Button(self, image=self.openImage, command=self.open_file_path, cursor='hand2', takefocus=0)
         self.file_button = tk.Button(self, image=self.fileImage, command=self.set_file_path, cursor='hand2', takefocus=0)
         self.folder_button = tk.Button(self, image=self.folderImage, command=self.set_folder_path, cursor='hand2', takefocus=0)
         self.ppk_button = tk.Button(self, image=self.keyImage, command=self.set_key_path, cursor='hand2', takefocus=0)
@@ -154,9 +158,8 @@ class windows(tk.Tk):
         self.run_button = ttk.Button(self, text='Download item(s)', command=self.run, state='disabled', takefocus=0)
 
         self.checkbox_var = tk.IntVar(value=1)
-
         self.recursive_checkbox = ttk.Checkbutton(self, text='Recursive', variable=self.checkbox_var, onvalue=1, offvalue=0)
-
+        
         self.status_label = ttk.Label(self, text='', foreground='RoyalBlue3', anchor=tk.CENTER)
 
         columns = ['Time', 'Action', 'File or folder', 'Status']
@@ -227,6 +230,7 @@ class windows(tk.Tk):
         self.local_label_item.place(x=200.5, y=212, width=194)
         self.local_folder.place(x=5, y=230, width=390)
 
+        self.open_button.place(x=337, y=212, width=19, height=19)
         self.file_button.place(x=357, y=212, width=19, height=19)
         self.folder_button.place(x=376, y=212, width=19, height=19)
 
@@ -235,6 +239,14 @@ class windows(tk.Tk):
 
         self.log.place(x=5, y=294, width=390)
         device_scrollbar.place(x=377, y=295, height=145)
+
+
+    def open_file_path(self):
+        lf = self.local_folder.get()
+        if os.path.isfile(lf):
+            os.startfile(lf)
+        elif os.path.isdir(lf):
+            wb.open(lf)
 
 
     def copy_timer(self):
@@ -443,12 +455,12 @@ class windows(tk.Tk):
                 self.remote_host_port.config(foreground='Black')
             except:
                 self.remote_host_port.config(foreground='Red')
-            
             self.validate_input()
        
 
     def validate_input(self, param=None):
         # validate input
+        self.open_button.destroy()
         if param is not None:
             if param.keysym.lower() in ['return']:
                 return
@@ -506,6 +518,10 @@ class windows(tk.Tk):
         else:
             self.run_button['state'] = 'disabled'
 
+        if os.path.isdir(lf) or os.path.isfile(lf):
+            self.open_button = tk.Button(self, image=self.openImage, command=self.open_file_path, cursor='hand2', takefocus=0)
+            self.open_button.place(x=337, y=212, width=19, height=19)
+
 
     def validate_key_path(self, param=None):
         # validate PPK path
@@ -521,6 +537,7 @@ class windows(tk.Tk):
         # validate local path
         action = 'Download' if self.action_selection.get() == 'Download from remote host' else 'Upload'
         path = self.local_folder.get()
+        self.open_button.destroy()
         if action == 'Upload':
             if len(path) > 0:
                 if os.path.isfile(path):
@@ -552,6 +569,10 @@ class windows(tk.Tk):
                     self.local_label_item.config(text='Nothing set')
                     self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
+        
+        if (os.path.isdir(path) or os.path.isfile(path)):
+            self.open_button = tk.Button(self, image=self.openImage, command=self.open_file_path, cursor='hand2', takefocus=0)
+            self.open_button.place(x=337, y=212, width=19, height=19)
 
 
     def run(self, param=None):

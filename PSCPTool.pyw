@@ -18,17 +18,6 @@ __author__ = "Menno van Heerde"
 __version__ = "1.0.2"
 __status__ = "Production"
 
-# hide python console window (.pyw extension breaks functionality)
-try:
-    import win32con
-    import win32gui
-    frgrnd_wndw = win32gui.GetForegroundWindow();
-    wndw_title  = win32gui.GetWindowText(frgrnd_wndw);
-    if wndw_title.endswith("py.exe") or wndw_title.endswith("python.exe"):
-        win32gui.ShowWindow(frgrnd_wndw, win32con.SW_HIDE)
-except:
-    pass
-
 
 def alert(header, message, icon, default='no'):
     # create and show messagebox

@@ -10,12 +10,13 @@ import tkinter as tk
 import webbrowser as wb
 from ipaddress import ip_address
 from tkinter import filedialog, messagebox, ttk
+
 from pexpect import EOF, TIMEOUT, popen_spawn
 from PIL import Image, ImageTk
 from pyperclip import copy, paste
 
 __author__ = "Menno van Heerde"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __status__ = "Production"
 
 # hide python console window (.pyw extension breaks functionality)
@@ -28,6 +29,26 @@ try:
         win32gui.ShowWindow(frgrnd_wndw, win32con.SW_HIDE)
 except:
     pass
+
+
+def known_hosts():
+    hosts = []
+    try:
+        tmp_hosts = sp.check_output('more %USERPROFILE%\\.ssh\\known_hosts', shell=1).decode().split()
+    except:
+        pass
+
+    if len(tmp_hosts) > 0:
+        for host in tmp_hosts:
+            try:
+                if ']:' in host:
+                    hosts.append(host.replace('[', '').replace(']', ''))
+                elif ip_address(host):
+                    hosts.append(f'{host}:22')
+            except:
+                continue
+        hosts = sorted(hosts)
+    return hosts
 
 
 def alert(header, message, icon, default='no'):
@@ -113,7 +134,7 @@ class windows(tk.Tk):
         self.keyImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x11\x08\x06\x00\x00\x00\xd0Z\xfc\xf9\x00\x00\x01SIDAT8Ocd\xa0\x12`\xa4\x929\x0c\x03c\x90|\xc9N\'\xc6\x7f\xffK\x81\xbe\xf0\xf8\xcf\xf0\x7f\xc9\xc3>\xcfX\x98\x8f\x88v\x91B\xe1\xf6\x08\x06\x06\xc6R\xa0\x1f\x8c\xa0\x9a\'<\xe8\xf3($\xc9 \x85\xa2\xed\t\xff\x19\x18g\x03me\x01j|\xc1\xf0\xef\x7f$\x90~\xf0`\x82\xe7\x03\xbc\x06I\xe7n\x93aec\xe6y\xd0\xeb~C\xbexg3\xe3\xff\xff5@\r?\x18\xfe3\x9c\xf8\xcf\xc4\xf8\xe6a\xaf{(z$\xa1x\rd\x00\x0b\x1bs?\xc3\xff\xff\x01P\xdb\xe1\xea\xff30\x1cy\xd8\xe7a\x8b+\x96\x11\x065\xecgQ\xf8\xfc\xf34\xd0V\x03t\xc5@C\xbe\xfc\xff\xf7/\xf1\xd1\x04\xaf5\x04\r\x92+\xdc\xe1\xc2\xc4\xc8\xb0\x1b\xa8\xe9\x0f\xd0\xf4;@\r\x1a0M\xff\x19\x19[\x80\xde\xa9\xc5\x97\xe6\xe0.\x02\x05(0V\xe630\xfc+|\xd0\xe75A\xa1x\xe7r\xa0\x17\x811\x05\x02\x8c\r\x0f\xfa\xdc\x1b\x892H\xaex\xbb\r\xd3\x7f\xc6\xc3\xc0\xd8Y\xf2\x8f\x89\xa1\x93\xf9\xff\xff\xc5po\xfeg\xf0|\xd0\xef\xb1\x83(\x83@\x8a\x801\xb4\x1a\x18C!\xc8\x1a\x80\xdeZ\x83-\x96\xf0\xc6\x1a\xd8\xb0\xc2\x1d9\x8c\x8c\x0c\xde\xe0\xb0\xfa\xcf\xb0\xf5\x01?\xfb\x1c\x86\x06\xc7?\x84\xf2$\xd1){\xe8\x19\x04\x00\xc2\x1eq\x12n\xc2\xbf\xe5\x00\x00\x00\x00IEND\xaeB`\x82")))
         self.fileImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x0f\x08\x06\x00\x00\x00;\xd6\x95J\x00\x00\x00BIDAT(Scd\x80\x80\xffP\x1a\x1b\xc5\x88K\x0e&AH3H\x1e\xc3\x10R4\x83\x1c\x80b\x00\xa9\x9aQ\x0c V3Vo\x13\xa3\x19g \x8ej\xc6\x93\xcc\xd0\xa4\xc0a5\xc4\x03\x8cx\xdf"\xa9\x04\x00\xdd\xf3\x11\x10)1\x98\xd9\x00\x00\x00\x00IEND\xaeB`\x82')))
         self.folderImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x11\x08\x06\x00\x00\x00\x02\n\xf6\xa1\x00\x00\x00uIDAT8Ocd\xa0\x000R\xa0\x97\x81r\xcdb\r\x7f\x02\xfe\xfd\xfb\xaf\x8f\xee\x8a7M\xac\x8d\xf8\\\x06\xb6Y\xb4\xee\xf7\x7fl\x8a^7\xb1\xe2u\x19^\xcd@\x13\x1b\xb0\x19\ns\x11^\xcd\xb8\x9c\xcc\xc8\xc8\xf8\xebU#\x0b;Y\x9aA\x86\x82\xbc4\xaa\x99\x84\xb4Jv\x80\x01\xe3\xff\x170\xae!Q%\\\xf7\xc7\x9f\x91\xe1\xbf\x01\xb1\x16\xa3$\x12b5\xa1\xab\xa3(W\x01\x00\xbe\x929\x12yk_\xb3\x00\x00\x00\x00IEND\xaeB`\x82')))
-        self.openImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x10\x00\x00\x00\x10\x08\x06\x00\x00\x00\x1f\xf3\xffa\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\xebIDAT8O\xb5\xd3!KDA\x14\xc5\xf1\xdf\xea\x06\x83k\xb3.\x98\xc4 \xb8\x0b"\x184\x99\xd6h\x144\xdbMZ\x97-\x1b\xd5\x0f\xe0\'P\x14\xb1\xa9q?\x84\xa0\xa0\x18l\x16\r+\xc8\x85\x01\x1f\xf8\x1e;/xa`\x98\xcb\xf9s.\xe7N\xc3oMa\x05\xa7\xe8\xe2\xbb\xd0+^\x9b\xe8\xa73n\xa4\xce4\x961D\x0b\x03\\T\x00\x0e0_\x04\x04d\x11\'\xf8\xc4#\xeep\x99\x0b\x08K\xc7\xd8\xc5\x1b\x9e\x12lT\x07p\x84w\x9cU\x88\x8a\xcf\x7fF\x08\x07e\x80%\xac&\xe5\x18\x0fxE6`\x13{X\xc3\x02vpS\x070\x87\x1e\xd6\xb1\x85C\\\xe5\x02"\xca\xed$\xbe\xc5>\xces\x01\xb3I\xbc\x81k\xdc\xa3\x83g\xbc\xe48h\'\xeb\x11g\x88c7j\xa50\x83\x98\xff\x03_%\xb1f\xa7P\xb5\x12\xff\x07\x88e\x8a\x85\x99T\xa5\xbfq\x92\xa8\xb2\xff\x03y\x93S\x11;;\xbfM\x00\x00\x00\x00IEND\xaeB`\x82')))
+        self.refreshImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0e\x00\x00\x00\x0e\x08\x06\x00\x00\x00\x1fH-\xd1\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x01\x99IDAT8OUR1r\x9c@\x10\xec^\xf4\x10\\\xa5\x07\xe8\xb0\x1d\xfb\xee#2\xe8\x01~\x02p\x81\x13?B@\xe0P\x99r\x91\xab|:;P\xa4*\xee\x0b\n]e\xb6]3\x8b\xf0\x99\x84\xad\xdd\xe9\x9e\xee\x9e!\xfc#@-\'B\x12\xde\x0f\xb1\x91x\xf9\'\xa8\xfeu\x1d&\x02\x10\tJ\x10h\x88\x05\xea\'\x02\x86\xa7\xb0\xe9\xd5@h\x01E\x02\xf5\x8f2|M\xcc\t\xb2\x02\xd3Q(\x86\xd8\x00,!\xe4k\x9d\xecE\xcf\x02\xebc\x19\xeeD\xeb\xb9\xc0?\xdcj\xab\xa0\xce\x00IRR\xe2?/\xe4\xb7\xd7W\xd5/_\xb2\xdf\x062s\xb8\xeab\x1e\xa8\xc9dH\x1a/\xc4\xfd\x1c\xf0\tP\x0b\xf0>\x93\xea\xc7*{r\x9a\x850\x01\xfb\xf8\x90\x01\xdb\x19\x1a\x7fV\xd9N\x02\x8aan$\xbc\x1c\xcb\xf0\xddm\xafa\x00\x12\xc1\xabNyFL\x02N\x87\x92\xef\xd6\xf7}\x0cjB|\xf3\xb9f\xee\xa9\x02,:\x95\x08\xe8\x00\xf4\x87\xcf\xac\x92\xe5\xc4/\xcfk\xd1v>6\xeb\xe8@\xaa\x03\xd8\x1f\xcas\xe0?3\x86M\x99\x13E?{\xea\xfc\xd8\xc5\xed\x1c\xf8 a<V\xdc\x99~O\xc0wb\xe9\xfc\x96\xac{\xd7\x04(\xa7\xcds\xd3\xc5\t@\x0e\xa2=\x94ao\xa38\x17\x98\x86.\x14\xb7I\x1d\xc9\x93S\x16\x83\x1a\n\xad\x17GU\x91\xb0tO6h3J\x08\x9b!6\x14[\xbb\x0b\x11;\x1b\xb5m\x85\x83\xd3\x8a\xf9\x96\x8c\xd6\x85\xc0\xe8J\xa4-h\x9bD\'~\xaaB\xff\xdf\xca\xb9_z\xc2y\xf2\x99v\xd7\x8a"0^D\xed\x1fo\x82\x91\xe1/\x1e\x11\xd5\\*\x19\xe6\x13\x00\x00\x00\x00IEND\xaeB`\x82')))
 
         self.action_selection_label = ttk.Label(self, text='Action')
         self.action_selection = ttk.Combobox(self, textvariable='', values=['Download from remote host', 'Upload to remote host'], state='readonly')
@@ -124,7 +145,11 @@ class windows(tk.Tk):
         self.set_timeout.set('0:02:30')
 
         self.remote_host_label = ttk.Label(self, text='Remote host IP address or FQDN')
-        self.remote_host = ttk.Entry(self, show='', foreground='Black')
+        
+        self.remote_host = ttk.Combobox(self, textvariable='', values=known_hosts())
+        #self.remote_host = ttk.Entry(self, show='', foreground='Black')
+        self.refresh_remote_host = tk.Button(self, image=self.refreshImage, command=self.refresh_remote_hosts, cursor='hand2', takefocus=0)
+        #self.refresh_remote_host.place(x=5,y=10)
 
         self.remote_host_port_label = ttk.Label(self, text='Port')
         self.remote_host_port = ttk.Entry(self, show='', foreground='Black')
@@ -142,13 +167,12 @@ class windows(tk.Tk):
         self.remote_folder = ttk.Entry(self, show='', foreground='Black')
 
         self.local_label = ttk.Label(self, text='Local path of file or directory')
-        self.local_label_item = ttk.Label(self, text='Directory set')
+        self.local_label_item = ttk.Label(self, text='Directory set (open)', cursor='hand2')
         self.local_label_item.config(foreground='RoyalBlue3')
         self.local_folder = ttk.Entry(self, show='', foreground='Black')
         
         self.local_folder.insert(0, set_basepath())
     
-        self.open_button = tk.Button(self, image=self.openImage, command=self.open_file_path, cursor='hand2', takefocus=0)
         self.file_button = tk.Button(self, image=self.fileImage, command=self.set_file_path, cursor='hand2', takefocus=0)
         self.folder_button = tk.Button(self, image=self.folderImage, command=self.set_folder_path, cursor='hand2', takefocus=0)
         self.ppk_button = tk.Button(self, image=self.keyImage, command=self.set_key_path, cursor='hand2', takefocus=0)
@@ -178,6 +202,7 @@ class windows(tk.Tk):
         self.action_selection.bind('<<ComboboxSelected>>', self.action_selection_warning)
         self.remote_host.bind('<FocusOut>', self.validate_remote_ip)
         self.remote_host.bind('<KeyRelease>', self.validate_remote_ip1)
+        self.remote_host.bind('<<ComboboxSelected>>', self.validate_remote_ip2)
         self.local_folder.bind('<KeyRelease>', self.validate_input)
         self.remote_host_port.bind('<KeyRelease>', self.validate_port)
         self.remote_host_username.bind('<KeyRelease>', self.validate_input)
@@ -186,6 +211,7 @@ class windows(tk.Tk):
         self.local_folder.bind('<KeyRelease>', self.validate_local_path)
         self.putty_private_key.bind('<KeyRelease>', self.validate_key_path)
 
+        self.local_label_item.bind('<Button-1>', self.open_file_folder)
         self.remote_host_username.bind('<Button-3>', lambda event: self.copy_paste_pass(event, 'Username'))
         self.remote_host_password.bind('<Button-3>', lambda event: self.copy_paste_pass(event, 'Password'))
         self.remote_host.bind('<Button-3>', lambda event: self.copy_paste_pass(event, 'Remote IP address'))
@@ -210,6 +236,7 @@ class windows(tk.Tk):
         self.status_label.place(x=125, y=1, width=150)
 
         self.remote_host_label.place(x=5, y=44, width=289)
+        self.refresh_remote_host.place(x=275, y=44, width=19, height=19)
         self.remote_host.place(x=5, y=62, width=289)
         self.remote_host_port_label.place(x=295, y=44, width=100)
         self.remote_host_port.place(x=295, y=62, width=100)
@@ -227,10 +254,9 @@ class windows(tk.Tk):
         self.remote_folder.place(x=5, y=188, width=390)
 
         self.local_label.place(x=5, y=212, width=195)
-        self.local_label_item.place(x=200.5, y=212, width=194)
+        self.local_label_item.place(x=200.5, y=212, width=144)
         self.local_folder.place(x=5, y=230, width=390)
 
-        self.open_button.place(x=337, y=212, width=19, height=19)
         self.file_button.place(x=357, y=212, width=19, height=19)
         self.folder_button.place(x=376, y=212, width=19, height=19)
 
@@ -241,12 +267,13 @@ class windows(tk.Tk):
         device_scrollbar.place(x=377, y=295, height=145)
 
 
-    def open_file_path(self):
-        lf = self.local_folder.get()
-        if os.path.isfile(lf):
-            os.startfile(lf)
-        elif os.path.isdir(lf):
-            wb.open(lf)
+    def open_file_folder(self, param=None):
+        if 'open' in self.local_label_item.cget('text'):
+            lf = self.local_folder.get()
+            if os.path.isfile(lf):
+                os.startfile(lf)
+            elif os.path.isdir(lf):
+                wb.open(lf)
 
 
     def copy_timer(self):
@@ -394,6 +421,29 @@ class windows(tk.Tk):
         self.validate_input()
 
 
+    def refresh_remote_hosts(self, param=None):
+        self.remote_host['values'] = known_hosts()
+
+
+    def validate_remote_ip2(self, param=None):
+        if param is not None:
+            if param.keysym.lower() in ['tab', 'shift_l', 'shift_r', 'return']:
+                return
+        rh = self.remote_host.get()
+        
+        self.remote_host_port.delete(0, 'end')
+        try:
+            rh2 = rh.split(':')
+            self.remote_host.set(rh2[0])
+            
+            self.remote_host_port.insert(0, rh2[1])
+        except:
+            self.remote_host.set('')
+            self.remote_host_port.insert(0, '22')
+        
+        self.validate_remote_ip()
+
+
     def validate_remote_ip1(self, param=None):
         # validate remote IP address
         if param is not None:
@@ -455,12 +505,11 @@ class windows(tk.Tk):
                 self.remote_host_port.config(foreground='Black')
             except:
                 self.remote_host_port.config(foreground='Red')
-            self.validate_input()
-       
+            self.validate_input()            
+
 
     def validate_input(self, param=None):
         # validate input
-        self.open_button.destroy()
         if param is not None:
             if param.keysym.lower() in ['return']:
                 return
@@ -479,15 +528,17 @@ class windows(tk.Tk):
         rf_check = 0 if action == 'Download' and len(rf) == 0 else 1
 
         if os.path.isdir(lf):
-            self.local_label_item.config(text = 'Directory set')
+            self.local_label_item.config(text = 'Directory set (open)', cursor='hand2')
         elif os.path.isfile(lf):
-            self.local_label_item.config(text = 'File set')
+            self.local_label_item.config(text = 'File set (open)', cursor='hand2')
         elif action == 'Upload':
-            self.local_label_item.config(text = 'Nothing set')
+            self.local_label_item.config(text = 'Nothing set', cursor='arrow')
+            self.local_label_item
         elif (os.path.isdir(os.path.dirname(lf)) and \
                 not os.path.isfile(lf) and \
                 not os.path.isdir(lf)) or (os.path.isdir(lf) or os.path.isfile(lf)):
-            self.local_label_item.config(text = 'Nonexistent item set')
+            self.local_label_item.config(text = 'Nonexistent item set', cursor='arrow')
+
 
         if action == 'Upload':
             if os.path.isfile(lf) or os.path.isdir(lf):
@@ -518,10 +569,6 @@ class windows(tk.Tk):
         else:
             self.run_button['state'] = 'disabled'
 
-        if os.path.isdir(lf) or os.path.isfile(lf):
-            self.open_button = tk.Button(self, image=self.openImage, command=self.open_file_path, cursor='hand2', takefocus=0)
-            self.open_button.place(x=337, y=212, width=19, height=19)
-
 
     def validate_key_path(self, param=None):
         # validate PPK path
@@ -537,22 +584,21 @@ class windows(tk.Tk):
         # validate local path
         action = 'Download' if self.action_selection.get() == 'Download from remote host' else 'Upload'
         path = self.local_folder.get()
-        self.open_button.destroy()
         if action == 'Upload':
             if len(path) > 0:
                 if os.path.isfile(path):
                     self.local_folder.config(foreground='Black')
-                    self.local_label_item.config(text='File set')
+                    self.local_label_item.config(text='File set (open)', cursor='hand2')
                     self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
                 elif os.path.isdir(path):
                     self.local_folder.config(foreground='Black')
-                    self.local_label_item.config(text='Directory set')
+                    self.local_label_item.config(text='Directory set (open)', cursor='hand2')
                     self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
                 else:
                     self.local_folder.config(foreground='Red')
-                    self.local_label_item.config(text='Nothing set')
+                    self.local_label_item.config(text='Nothing set', cursor='arrow')
                     self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
         else:
@@ -561,7 +607,15 @@ class windows(tk.Tk):
                     not os.path.isfile(path) and \
                     not os.path.isdir(path)) or (os.path.isdir(path) or os.path.isfile(path)):
                     self.local_folder.config(foreground='Black')
-                    self.local_label_item.config(text='File set' if os.path.isfile(path) else 'Directory set' if os.path.isdir(path) else 'Nonexistent item set')
+                    self.local_label_item.config(
+                        text='File set (open)'
+                            if os.path.isfile(path)
+                            else 'Directory set (open)'
+                            if os.path.isdir(path)
+                            else 'Nonexistent item set',
+                        cursor='arrow'
+                        if not os.path.isdir(path) and not os.path.isfile(path)
+                        else 'hand2')
                     self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
                 else:
@@ -570,10 +624,6 @@ class windows(tk.Tk):
                     self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
         
-        if (os.path.isdir(path) or os.path.isfile(path)):
-            self.open_button = tk.Button(self, image=self.openImage, command=self.open_file_path, cursor='hand2', takefocus=0)
-            self.open_button.place(x=337, y=212, width=19, height=19)
-
 
     def run(self, param=None):
         # run validation checks

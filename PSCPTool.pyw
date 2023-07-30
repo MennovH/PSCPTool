@@ -36,7 +36,7 @@ def known_hosts():
     try:
         tmp_hosts = sp.check_output('more %USERPROFILE%\\.ssh\\known_hosts', shell=1).decode().split()
     except:
-        pass
+        tmp_hosts = []
 
     if len(tmp_hosts) > 0:
         for host in tmp_hosts:
@@ -47,7 +47,7 @@ def known_hosts():
                     hosts.append(f'{host}:22')
             except:
                 continue
-        hosts = sorted(hosts)
+        hosts = sorted(list(set(hosts)))
     return hosts
 
 

@@ -63,7 +63,7 @@ def alert(header, message, icon, default='no'):
         else:
             result = messagebox.askquestion(header, message, icon=icon, default=default)
         pop_up.destroy()
-    except Exception as e:
+    except:
         result = 2
     return result
 
@@ -129,7 +129,8 @@ class windows(tk.Tk):
 
         # set GUI layout including controls
         self.wm_title(f"PSCPTool - v{__version__}")
-        self.geometry('400x446')        
+        self.geometry('400x446')
+
         self.icon = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00 \x00\x00\x00 \x08\x06\x00\x00\x00szz\xf4\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x04gAMA\x00\x00\xb1\x8f\x0b\xfca\x05\x00\x00\x00\tpHYs\x00\x00\x0e\xc3\x00\x00\x0e\xc3\x01\xc7o\xa8d\x00\x00\x01%IDATXG\xc5\x92a\x12\x85 \x08\x84=zG\xebf\xbdV\xc0\xd0\xc1\x12\xa5\xde7\xb3\x93"\xec\xf2\xa3\x14\xc0\xe1T(\xc7\xbe\xef\xc3\xda\xb6-t\x89c\x14\t\x7fe\x81\x94`z\xaf\x0f\x16\xc0\xb7\xaf?,\x90C\xca\xfd\xe3\x05P\xff\xcb\x02\x14\xda\x86C\x1f,@\xc1V8\xf4\xf2\x02\xf8\x92p\xc6\xb5\xd5k\x0b@\x08\x86\xe8lc, \x9a\xe6\xb4\xad\xc3%\xe0N\xe8\xc32@\xee0\xf3R\x82%|T:|f\x81<\xa0\xc3{\xa2>\x9b\xd9\xff\xe1\x1c}\x16\xfa \x84\xf4$\xe1z\x812\xe8U\x1b\xaeC\xda^\xd4\xf4\x02\\\xcf\x9c\x06>h\xa6\x0e\x17\xe3\x11\xa1\x1f\xc1\x02<\xa5X\xd4\x83\xde\xae\xe0IUd\xe3\x11\xa8\xb7\n\x0f\xa1\x98[\x12\xe8\\\x85C!\xe4\x80;\xa8\xa7^\x8a\xcf!dC\x01w]\xa3s]\x03\xdc\x17\x02[\xda\xe0\xdd\xea\xe1z\x08ly\x85\x89\xee\xe0\x9e\x10\xd8\xd2\x07\xe6h|\x1dm\xf8(\x81\xef!\xb0\xa5\x0f\xcc\xd1\xf8:\xda\xd0\x94\x05\xbf\x85\xc0\x96>0G\xe3\xeb\xb0\xe5\x05j\x964\\\x0b\x81-}`\x8e\xc6\xd7\x11\xb3\x19-\x92\xd2\x0f\xd8F0uC\xc6\x9b\x88\x00\x00\x00\x00IEND\xaeB`\x82')))
         self.iconphoto(False, self.icon)
 
@@ -150,9 +151,7 @@ class windows(tk.Tk):
         self.remote_host_label = ttk.Label(self, text='Remote host IP address or FQDN')
         
         self.remote_host = ttk.Combobox(self, textvariable='', values=known_hosts())
-        #self.remote_host = ttk.Entry(self, show='', foreground='Black')
         self.refresh_remote_host = tk.Button(self, image=self.refreshImage, command=self.refresh_remote_hosts, cursor='hand2', takefocus=0)
-        #self.refresh_remote_host.place(x=5,y=10)
 
         self.remote_host_port_label = ttk.Label(self, text='Port')
         self.remote_host_port = ttk.Entry(self, show='', foreground='Black')
@@ -274,6 +273,25 @@ class windows(tk.Tk):
         device_scrollbar.place(x=377, y=295, height=145)
 
 
+    def colors(self, param=None):
+        warning_color = 'darkorange'
+        action = 'Download' if self.action_selection.get() == 'Download from remote host' else 'Upload'
+        for label in filter(lambda w:isinstance(w,ttk.Label), self.children.values()):
+            if action == 'Download':
+                label.config(background='SystemButtonFace')
+            else:
+                label.config(background=warning_color)
+
+        if action == 'Download':
+            self.config(bg='SystemButtonFace')
+            self.style.configure("TCheckbutton", background="SystemButtonFace", foreground="black")
+            self.local_label_item.config(background='SystemButtonFace', foreground='RoyalBlue3')
+        else:
+            self.config(bg=warning_color)
+            self.style.configure("TCheckbutton", background=warning_color)
+            self.local_label_item.config(background=warning_color, foreground='blue')
+
+
     def open_file_folder(self, param=None):
         if 'open' in self.local_label_item.cget('text'):
             lf = self.local_folder.get()
@@ -352,7 +370,6 @@ class windows(tk.Tk):
                 self.local_folder.delete(0, 'end')
                 self.local_folder.insert(0, paste())
                 self.validate_local_path()
-                self.validate_input()
                 copy('')
             else:
                 copy(self.local_folder.get())
@@ -418,6 +435,7 @@ class windows(tk.Tk):
 
     def action_selection_warning(self, param=None):
         # color button based on dropdown selection
+        self.colors()
         if self.action_selection.get() == 'Download from remote host':
             self.run_button['text'] = 'Download item(s)'
             self.style.configure('TButton', foreground='Black')
@@ -425,7 +443,6 @@ class windows(tk.Tk):
             self.run_button['text'] = 'Upload item(s)'
             self.style.configure('TButton', foreground='Red')
         self.validate_local_path()
-        self.validate_input()
 
 
     def refresh_remote_hosts(self, param=None):
@@ -504,14 +521,18 @@ class windows(tk.Tk):
         # validate port number
         if param.keysym.lower() not in ['tab', 'shift_l', 'shift_r', 'return']:
             port = self.remote_host_port.get()
-            self.remote_host_port.delete(0, 'end')
-            port = re.sub('[^0-9]', '', port)
-            self.remote_host_port.insert(0, port.replace(' ', ''))
             try:
-                port = int(port)
+                int(port.replace(' ', '.'))
                 self.remote_host_port.config(foreground='Black')
             except:
-                self.remote_host_port.config(foreground='Red')
+                self.remote_host_port.delete(0, 'end')
+                port = re.sub('[^0-9]', '', port)
+                self.remote_host_port.insert(0, port.replace(' ', ''))
+                try:
+                    port = int(port)
+                    self.remote_host_port.config(foreground='Black')
+                except:
+                    self.remote_host_port.config(foreground='Red')
             self.validate_input()            
 
 
@@ -604,19 +625,19 @@ class windows(tk.Tk):
                 if os.path.isfile(path):
                     self.local_folder.config(foreground='Black')
                     self.local_label_item.config(text='File set (open)', cursor='hand2')
-                    self.local_label_item.config(foreground='RoyalBlue3')
+                    # self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
                     self.run_button['cursor'] = 'hand2'
                 elif os.path.isdir(path):
                     self.local_folder.config(foreground='Black')
                     self.local_label_item.config(text='Directory set (open)', cursor='hand2')
-                    self.local_label_item.config(foreground='RoyalBlue3')
+                    # self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
                     self.run_button['cursor'] = 'hand2'
                 else:
                     self.local_folder.config(foreground='Red')
                     self.local_label_item.config(text='Nothing set', cursor='arrow')
-                    self.local_label_item.config(foreground='Red')
+                    # self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
                     self.run_button['cursor'] = 'arrow'
         else:
@@ -634,17 +655,18 @@ class windows(tk.Tk):
                         cursor='arrow'
                         if not os.path.isdir(path) and not os.path.isfile(path)
                         else 'hand2')
-                    self.local_label_item.config(foreground='RoyalBlue3')
+                    # self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
                     self.run_button['cursor'] = 'hand2'
 
                 else:
                     self.local_folder.config(foreground='Red')
                     self.local_label_item.config(text='Nothing set')
-                    self.local_label_item.config(foreground='Red')
+                    # self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
                     self.run_button['cursor'] = 'arrow'
-        
+        self.validate_input()
+
 
     def listdir(self, param=None):
         # run validation checks

@@ -8,23 +8,25 @@ import threading
 import time
 import tkinter as tk
 import webbrowser as wb
+from io import StringIO
 from ipaddress import ip_address
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from pexpect import EOF, TIMEOUT, popen_spawn
 from PIL import Image, ImageTk
 from pyperclip import copy, paste
 
-__author__ = "Menno van Heerde"
-__version__ = "1.0.3"
+__author__ = "Menno vH"
+__version__ = "1.0.4"
 __status__ = "Production"
 
 # hide python console window (.pyw extension breaks functionality)
 try:
     import win32con
     import win32gui
-    frgrnd_wndw = win32gui.GetForegroundWindow();
-    wndw_title  = win32gui.GetWindowText(frgrnd_wndw);
+    frgrnd_wndw = win32gui.GetForegroundWindow()
+    wndw_title  = win32gui.GetWindowText(frgrnd_wndw)
     if wndw_title.endswith("py.exe") or wndw_title.endswith("python.exe"):
         win32gui.ShowWindow(frgrnd_wndw, win32con.SW_HIDE)
 except:
@@ -134,7 +136,8 @@ class windows(tk.Tk):
         self.keyImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x12\x00\x00\x00\x11\x08\x06\x00\x00\x00\xd0Z\xfc\xf9\x00\x00\x01SIDAT8Ocd\xa0\x12`\xa4\x929\x0c\x03c\x90|\xc9N\'\xc6\x7f\xffK\x81\xbe\xf0\xf8\xcf\xf0\x7f\xc9\xc3>\xcfX\x98\x8f\x88v\x91B\xe1\xf6\x08\x06\x06\xc6R\xa0\x1f\x8c\xa0\x9a\'<\xe8\xf3($\xc9 \x85\xa2\xed\t\xff\x19\x18g\x03me\x01j|\xc1\xf0\xef\x7f$\x90~\xf0`\x82\xe7\x03\xbc\x06I\xe7n\x93aec\xe6y\xd0\xeb~C\xbexg3\xe3\xff\xff5@\r?\x18\xfe3\x9c\xf8\xcf\xc4\xf8\xe6a\xaf{(z$\xa1x\rd\x00\x0b\x1bs?\xc3\xff\xff\x01P\xdb\xe1\xea\xff30\x1cy\xd8\xe7a\x8b+\x96\x11\x065\xecgQ\xf8\xfc\xf34\xd0V\x03t\xc5@C\xbe\xfc\xff\xf7/\xf1\xd1\x04\xaf5\x04\r\x92+\xdc\xe1\xc2\xc4\xc8\xb0\x1b\xa8\xe9\x0f\xd0\xf4;@\r\x1a0M\xff\x19\x19[\x80\xde\xa9\xc5\x97\xe6\xe0.\x02\x05(0V\xe630\xfc+|\xd0\xe75A\xa1x\xe7r\xa0\x17\x811\x05\x02\x8c\r\x0f\xfa\xdc\x1b\x892H\xaex\xbb\r\xd3\x7f\xc6\xc3\xc0\xd8Y\xf2\x8f\x89\xa1\x93\xf9\xff\xff\xc5po\xfeg\xf0|\xd0\xef\xb1\x83(\x83@\x8a\x801\xb4\x1a\x18C!\xc8\x1a\x80\xdeZ\x83-\x96\xf0\xc6\x1a\xd8\xb0\xc2\x1d9\x8c\x8c\x0c\xde\xe0\xb0\xfa\xcf\xb0\xf5\x01?\xfb\x1c\x86\x06\xc7?\x84\xf2$\xd1){\xe8\x19\x04\x00\xc2\x1eq\x12n\xc2\xbf\xe5\x00\x00\x00\x00IEND\xaeB`\x82")))
         self.fileImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x0f\x08\x06\x00\x00\x00;\xd6\x95J\x00\x00\x00BIDAT(Scd\x80\x80\xffP\x1a\x1b\xc5\x88K\x0e&AH3H\x1e\xc3\x10R4\x83\x1c\x80b\x00\xa9\x9aQ\x0c V3Vo\x13\xa3\x19g \x8ej\xc6\x93\xcc\xd0\xa4\xc0a5\xc4\x03\x8cx\xdf"\xa9\x04\x00\xdd\xf3\x11\x10)1\x98\xd9\x00\x00\x00\x00IEND\xaeB`\x82')))
         self.folderImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0f\x00\x00\x00\x11\x08\x06\x00\x00\x00\x02\n\xf6\xa1\x00\x00\x00uIDAT8Ocd\xa0\x000R\xa0\x97\x81r\xcdb\r\x7f\x02\xfe\xfd\xfb\xaf\x8f\xee\x8a7M\xac\x8d\xf8\\\x06\xb6Y\xb4\xee\xf7\x7fl\x8a^7\xb1\xe2u\x19^\xcd@\x13\x1b\xb0\x19\ns\x11^\xcd\xb8\x9c\xcc\xc8\xc8\xf8\xebU#\x0b;Y\x9aA\x86\x82\xbc4\xaa\x99\x84\xb4Jv\x80\x01\xe3\xff\x170\xae!Q%\\\xf7\xc7\x9f\x91\xe1\xbf\x01\xb1\x16\xa3$\x12b5\xa1\xab\xa3(W\x01\x00\xbe\x929\x12yk_\xb3\x00\x00\x00\x00IEND\xaeB`\x82')))
-        self.refreshImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0e\x00\x00\x00\x0e\x08\x06\x00\x00\x00\x1fH-\xd1\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x01\x99IDAT8OUR1r\x9c@\x10\xec^\xf4\x10\\\xa5\x07\xe8\xb0\x1d\xfb\xee#2\xe8\x01~\x02p\x81\x13?B@\xe0P\x99r\x91\xab|:;P\xa4*\xee\x0b\n]e\xb6]3\x8b\xf0\x99\x84\xad\xdd\xe9\x9e\xee\x9e!\xfc#@-\'B\x12\xde\x0f\xb1\x91x\xf9\'\xa8\xfeu\x1d&\x02\x10\tJ\x10h\x88\x05\xea\'\x02\x86\xa7\xb0\xe9\xd5@h\x01E\x02\xf5\x8f2|M\xcc\t\xb2\x02\xd3Q(\x86\xd8\x00,!\xe4k\x9d\xecE\xcf\x02\xebc\x19\xeeD\xeb\xb9\xc0?\xdcj\xab\xa0\xce\x00IRR\xe2?/\xe4\xb7\xd7W\xd5/_\xb2\xdf\x062s\xb8\xeab\x1e\xa8\xc9dH\x1a/\xc4\xfd\x1c\xf0\tP\x0b\xf0>\x93\xea\xc7*{r\x9a\x850\x01\xfb\xf8\x90\x01\xdb\x19\x1a\x7fV\xd9N\x02\x8aan$\xbc\x1c\xcb\xf0\xddm\xafa\x00\x12\xc1\xabNyFL\x02N\x87\x92\xef\xd6\xf7}\x0cjB|\xf3\xb9f\xee\xa9\x02,:\x95\x08\xe8\x00\xf4\x87\xcf\xac\x92\xe5\xc4/\xcfk\xd1v>6\xeb\xe8@\xaa\x03\xd8\x1f\xcas\xe0?3\x86M\x99\x13E?{\xea\xfc\xd8\xc5\xed\x1c\xf8 a<V\xdc\x99~O\xc0wb\xe9\xfc\x96\xac{\xd7\x04(\xa7\xcds\xd3\xc5\t@\x0e\xa2=\x94ao\xa38\x17\x98\x86.\x14\xb7I\x1d\xc9\x93S\x16\x83\x1a\n\xad\x17GU\x91\xb0tO6h3J\x08\x9b!6\x14[\xbb\x0b\x11;\x1b\xb5m\x85\x83\xd3\x8a\xf9\x96\x8c\xd6\x85\xc0\xe8J\xa4-h\x9bD\'~\xaaB\xff\xdf\xca\xb9_z\xc2y\xf2\x99v\xd7\x8a"0^D\xed\x1fo\x82\x91\xe1/\x1e\x11\xd5\\*\x19\xe6\x13\x00\x00\x00\x00IEND\xaeB`\x82')))
+        self.listDir = ImageTk.PhotoImage(Image.open(io.BytesIO(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\r\x00\x00\x00\r\x08\x06\x00\x00\x00r\xeb\xe4|\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x01\x9fIDAT(SE\x92Qr\xd30\x10\x86\xff\x95\xdci\x87\\B\xdc\xc0M\xe93qxb8\x04\xf19Hb\x8b&\xe7H.A\xf2f\xcb\xcfM\xd2\xe1\x04\xf5%``\x82v\x19I6\xe8i\xed\xd5\xfe\xfb\xef\xb7"\x8c\x87\x80\xc7MW\xfd\xf1<SZ\x19\x11v\xc4\xd2]\xd6\x1f\xf6B\x02\xc8p\x91\x08\x04"\xe4\xf57\xa3\xf5\xa4U\x84=\x98\xbb+\xff\xea5\xdd\xcdD\xa9\x8a\xe0\xddy9/C\t\x11 \x12\x8b\x80\xdc6mF\xb0\xa7\xf5\xdc\x05\xd1\x94\x05\xf2\xfa`D\xdf\xee2\xd2\xee\xb4\x9c\xd9\xf0;$h\xfa\xb5Y\x08\xd1\xe7\x97UQ\x04\x05\t\xb7\t Iqn\x0fFg\x93\xf6\xbc|\xff6&b\xd1\xa6\xd9\x81\xa9\xbb\xac\x8b=\xd1P\x14\xebB\x1c\xba\n\xeem\xdbj\xc0\x9e\xd7\x85\x93\x90\xc9\x9f\x9a\xf6F\xc8>W\x85\x1b\xd5G\xc5\xd4\x12H\xc2\tJ\xec\xf4\xb8\xed*\x0fo._\xe6e\xb4\x9c\xc6\x89\xf6Fd\xd3m\xf7\xca\xd7\x1f\xc5\x8b\xfd\xd4C\x04to\x8f\x86\xb27-_\x7f\x16\xdf\xeb\x8f}\x80\x10\xe7\n6D\xf0\xb0\xed*\x166\x97\x81`\xec\x14\xbcO\x9f\x9a\x05\x02^\xe6\xf2\xb4*\xdc\xb8\xbaw\x9b\xae\x12\xa0\x06\xfc~\xc4\x1e\x1dG\x13aW\xd5\xc1\x90\xbe\xdb)\xa5\x0c\xb3\xef\x15\xa9\x19\x0b\xbb\x80\xdbCj\x02\xf5$\\\x9eW\x85\x0b\xc0\x86e\xa7\x19\xf2\xfahn\xd4\xady^\xcdc\xc7\x80\\\xe9I\x0b\xc0\x88x\'\xfew\x19\x97\xfb\xff\x89\x8c\xf1\x00|\x10\xcc\xabct\x91)\xe5<\xb0\x88\xc0\xe2It\x03\x9c\x7f\xdfq\xcf\xf1\xe9\xa4\xfc\xc3\xc6\xbd\x82\xc5\xfe\x05\x9d}\xcc\xcbk]\xc9\xd8\x00\x00\x00\x00IEND\xaeB`\x82')))
+        self.refreshImage = ImageTk.PhotoImage(Image.open(io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x0b\x00\x00\x00\r\x08\x06\x00\x00\x00\x7f\xf5\x94;\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x01YIDAT(SERAN\x02A\x10\xac\x9a\xf9\xc8\x1e\x16\x03w\x1f\xb0<C!\x8aW=\xf8\x04\x97/\xf8\x01Ld\xc1\x0fx\xf0\x04\x0f\xf0\x03\x08*\xc6\x07\x98x3\xb2]\xa6g \xcea&\xe9\xae\xea\xae\xea\x1e\x82\x00\x85t\xd2C\xa0so\n\xc4S+^n\x86\xe1-g\x012\xa1\x01\t\xe8\xcd\xad\xf85U\x04\'\x99\xac\xefH\\\xad\x06a\xba\xaf\x93Y\xdd\x99\xaa\x9di\xe1L:\xd9+\xa5\x0b\x1ff\xbaz;\x8b\x8f\x1eO\xc0_a\xc1\x0c\xa9\x05\xd5\x1e\x07\xf8\xf0#\\~\x0e\xf9\x95y$:3[\xc0P\xc5\x80\xfe\xea$,\xcb\xa6\xf5\xdc\xf5f\x10o\xb3\x0f\xa5V\xec\xce\xacj\xc5\x05\x88\xe5\xe64\xf4=z4\xb3\xe3\x97Ax\x96\xd7\xca\xb6s\x9f\xb2\xd1\x88\x80\x1b\xba\xdb\x0cx\xe1\x9d\xdc,\xa9\x0c\xd3\xff\xb8XN\xed\x06d\r\xa1~\x1d\x86\xf1\x7f>\x83I\xa2\x9c\xda\x08\xc49\xdd\\+%\x19\xeb\xd3\x98d$+\xfb\xc9\xbb\x94Nc\x13\x08#\xf6\xe6*v\x86w\xc7\xc4\xa8\xfe\xea$.E\x1d<%J\xd9\x98\xa8}\x81\xa4[\x9a0b+s\xedq\xec\xe8n\xa3bGL\x94\x17\x95\xc7\xd9\x9d\xabh\r\xe7\x90j7\x18\x88m+\x14\x9e\x94\x04\x06\xa6I\xa5\xa5\x1c\xfeD9\xd5\r\x83*\xb4\xac\xd2/\xa0\xb6\x12\xef\xd6C\x8e\x1d\xf7\x07\xb4\xc9\xb4y\xe9:\xa3\x98\x00\x00\x00\x00IEND\xaeB`\x82")))
 
         self.action_selection_label = ttk.Label(self, text='Action')
         self.action_selection = ttk.Combobox(self, textvariable='', values=['Download from remote host', 'Upload to remote host'], state='readonly')
@@ -164,7 +167,10 @@ class windows(tk.Tk):
         self.putty_private_key = ttk.Entry(self, show='', foreground='Black')
 
         self.remote_label = ttk.Label(self, text='Remote path of file or directory')
-        self.remote_folder = ttk.Entry(self, show='', foreground='Black')
+        # self.remote_folder = ttk.Entry(self, show='', foreground='Black')
+        
+        self.remote_folder = ttk.Combobox(self, textvariable='', values=[])
+        self.listdir_button = tk.Button(self, image=self.listDir, command=self.listdir, cursor='arrow', takefocus=0, state='disabled')
 
         self.local_label = ttk.Label(self, text='Local path of file or directory')
         self.local_label_item = ttk.Label(self, text='Directory set (open)', cursor='hand2')
@@ -252,6 +258,7 @@ class windows(tk.Tk):
 
         self.remote_label.place(x=5, y=170, width=390)
         self.remote_folder.place(x=5, y=188, width=390)
+        self.listdir_button.place(x=376, y=170, width=19, height=19)
 
         self.local_label.place(x=5, y=212, width=195)
         self.local_label_item.place(x=200.5, y=212, width=144)
@@ -539,7 +546,6 @@ class windows(tk.Tk):
                 not os.path.isdir(lf)) or (os.path.isdir(lf) or os.path.isfile(lf)):
             self.local_label_item.config(text = 'Nonexistent item set', cursor='arrow')
 
-
         if action == 'Upload':
             if os.path.isfile(lf) or os.path.isdir(lf):
                 path = 1
@@ -561,13 +567,22 @@ class windows(tk.Tk):
         if validate_ip(rh) and \
             len(ru) > 0 and \
             len(rp) > 0 and \
-            rf_check and \
-            path and \
             key_path and \
             isinstance(rhp, int):
-            self.run_button['state'] = 'normal'
+            self.listdir_button['state'] = 'normal'
+            self.listdir_button['cursor'] = 'hand2'
+            
+            if path and rf_check:
+                self.run_button['state'] = 'normal'
+                self.run_button['cursor'] = 'hand2'
+            else:
+                self.run_button['state'] = 'disabled'
+                self.run_button['cursor'] = 'arrow'
         else:
             self.run_button['state'] = 'disabled'
+            self.run_button['cursor'] = 'arrow'
+            self.listdir_button['state'] = 'disabled'
+            self.listdir_button['cursor'] = 'arrow'
 
 
     def validate_key_path(self, param=None):
@@ -591,16 +606,19 @@ class windows(tk.Tk):
                     self.local_label_item.config(text='File set (open)', cursor='hand2')
                     self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
+                    self.run_button['cursor'] = 'hand2'
                 elif os.path.isdir(path):
                     self.local_folder.config(foreground='Black')
                     self.local_label_item.config(text='Directory set (open)', cursor='hand2')
                     self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
+                    self.run_button['cursor'] = 'hand2'
                 else:
                     self.local_folder.config(foreground='Red')
                     self.local_label_item.config(text='Nothing set', cursor='arrow')
                     self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
+                    self.run_button['cursor'] = 'arrow'
         else:
             if len(path) > 0:
                 if (os.path.isdir(os.path.dirname(path)) and \
@@ -618,17 +636,122 @@ class windows(tk.Tk):
                         else 'hand2')
                     self.local_label_item.config(foreground='RoyalBlue3')
                     self.run_button['state'] = 'normal'
+                    self.run_button['cursor'] = 'hand2'
+
                 else:
                     self.local_folder.config(foreground='Red')
                     self.local_label_item.config(text='Nothing set')
                     self.local_label_item.config(foreground='Red')
                     self.run_button['state'] = 'disabled'
+                    self.run_button['cursor'] = 'arrow'
         
+
+    def listdir(self, param=None):
+        # run validation checks
+        self.validate_remote_ip(param=None)
+        self.run_button['state'] = 'disabled'
+        self.run_button['cursor'] = 'arrow'
+        self.listdir_button['state'] = 'disabled'
+        self.listdir_button['cursor'] = 'arrow'
+        self.update()
+        rhp = self.remote_host_port.get()
+        rh = self.remote_host.get()
+        rf = self.remote_folder.get()
+        un = self.remote_host_username.get()
+        pw = self.remote_host_password.get()
+        kp = self.putty_private_key.get()
+        action = 'Download' if self.action_selection.get() == 'Download from remote host' else 'Upload'
+        
+        if not param:
+            tm = dt.datetime.now().strftime('%H:%M:%S')
+            self.log.insert('', 'end', values=(tm, 'List dir', rf, 'Running',))
+
+        try: rhp = int(rhp)
+        except: pass
+        
+        if validate_ip(rh) and \
+            len(un) > 0 and \
+            len(pw) > 0 and \
+            (os.path.isfile(kp) or len(kp) == 0) and \
+            isinstance(rhp, int):
+            self.run_button['text'] = 'Fetching info'
+            self.update()
+
+            kp = f'-i {kp}' if os.path.isfile(kp) else ''
+            
+            # run PSCP
+            encoding = 'utf-8'
+            timeout = convert_to_seconds(self.set_timeout.get())
+
+            # start pexpect process
+            self.error = ''
+            
+            self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp -ls -P {rhp} {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
+            
+            # handle pexpect feedback
+            condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory', 'Too many failures',
+                'Cannot assign requested address', 'nvalid', 'ncorrect', 'diffie', 'cache?', 'key to continue', 'begin', 'ser: ',
+                'sername: ', 'ogin: ', 'ogin as: ', "ssword:", 'phrase', '100%', '-p -r -d options not supported', EOF, TIMEOUT]
+            action_list = [0, 0, 0, 0, 0, 0, 0, 0, 'y', 'n', '\n', '\n', un, un, un, un, pw, pw, 0, 0, 0, 0]
+            self.send_on_condition([condition_list, action_list])
+
+            # parse feedback
+            err = str(self.error)
+            err = '0%; EOF' if 'EOF' in err else \
+                'Address error' if 'Cannot assign requested address' in err else \
+                'Timeout' if 'TIMEOUT' in err else \
+                'Item not found' if err == 'No such file or directory' else \
+                'Failed to recurse' if '-p -r -d options not supported' in err else \
+                err
+            
+            items = []
+            with StringIO(self.session.before) as f:
+                lines = f.readlines()
+                for line in lines:
+                    try:
+                        split_line = line.split()
+                        if split_line[0].lower() == 'total' or \
+                            split_line[-1] in ['.', '..']:
+                            continue
+                        
+                        items.append(rf if split_line[-1] == rf else \
+                            f'{rf.rstrip("/")}/{split_line[-1]}') if rf != "" else \
+                            items.append(split_line[-1])
+                    except:
+                        pass
+
+            if err in ['0%; EOF', 'Access Denied'] and len(items) > 0:
+                err = f'{len(items)} item{"" if len(items) == 1 else "s"} found'
+
+            if not param:
+                self.remote_folder['values'] = items
+            else:
+                return items
+
+            self.run_button['state'] = 'normal'
+            self.run_button['cursor'] = 'hand2'
+        else:
+            self.run_button['state'] = 'disabled'
+            self.run_button['cursor'] = 'arrow'
+
+        self.log.set(self.log.get_children()[-1], 3, err)
+        
+        # auto scroll down treeview
+        try: self.log.see(self.log.get_children()[-1])
+        except: pass
+        self.run_button['text'] = 'Upload item(s)' if action == 'Upload' else 'Download item(s)'
+        self.listdir_button['state'] = 'normal'
+        self.listdir_button['cursor'] = 'hand2'
+        self.update()
+
 
     def run(self, param=None):
         # run validation checks
         self.validate_remote_ip(param=None)
         self.run_button['state'] = 'disabled'
+        self.run_button['cursor'] = 'arrow'
+        self.listdir_button['state'] = 'disabled'
+        self.listdir_button['cursor'] = 'arrow'
         self.update()
         rhp = self.remote_host_port.get()
         rh = self.remote_host.get()
@@ -685,7 +808,7 @@ class windows(tk.Tk):
                     self.run_button['state'] = 'normal'
                     self.update()
                     return
-            
+
             # run PSCP
             encoding = 'utf-8'
             timeout = convert_to_seconds(self.set_timeout.get())
@@ -693,33 +816,56 @@ class windows(tk.Tk):
             # start pexpect process
             self.error = ''
             tm = dt.datetime.now().strftime('%H:%M:%S')
+            file = os.path.basename(rf) if action == 'Download' else os.path.basename(lf)
+
+            self.log.insert('', 'end', values=(tm, action, file, 'Running',))
             recursive = '-r' if rs else ''
             if action == 'Download':          
-                file = os.path.basename(rf)
                 self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout)
             else:
-                file = os.path.basename(lf)
                 self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
             
             # handle pexpect feedback
-            condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory', 'Too many failures', 'Cannot assign requested address', 'nvalid', 'ncorrect', 'diffie', 'cache?', 'key to continue', 'begin', 'ser: ', 'sername: ', 'ogin: ', 'ogin as: ', "ssword:", 'phrase', '100%', '-p -r -d options not supported', EOF, TIMEOUT]
+            condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory',
+                'Too many failures', 'Cannot assign requested address', 'nvalid', 'ncorrect', 'diffie', 'cache?',
+                'key to continue', 'begin', 'ser: ', 'sername: ', 'ogin: ', 'ogin as: ', "ssword:", 'phrase', '100%',
+                '-p -r -d options not supported', EOF, TIMEOUT]
+
             action_list = [0, 0, 0, 0, 0, 0, 0, 0, 'y', 'n', '\n', '\n', un, un, un, un, pw, pw, 0, 0, 0, 0]
             self.send_on_condition([condition_list, action_list])
 
             # parse feedback
             err = str(self.error)
-            err = '0%; EOF' if 'EOF' in err else 'Address error' if 'Cannot assign requested address' in err else 'Timeout' if 'TIMEOUT' in err else 'Item not found' if err == 'No such file or directory' else 'Failed to recurse' if '-p -r -d options not supported' in err else err
+            err = '0%; EOF' if 'EOF' in err else \
+                'Address error' if 'Cannot assign requested address' in err else \
+                'Timeout' if 'TIMEOUT' in err else \
+                'Item not found' if err == 'No such file or directory' else \
+                'Failed to recurse' if '-p -r -d options not supported' in err else \
+                err
             
+            if err in ['0%; EOF', 'Access Denied'] and action == 'Upload':
+                self.log.set(self.log.get_children()[-1], 3, 'Validating')
+                validate_transfer = self.listdir(param='list')
+                if Path(lf).name in validate_transfer:
+                    err = '100%'
+
             if action == 'Download' and err == '100%':
+                self.log.set(self.log.get_children()[-1], 3, 'Validating')
                 for _ in range(100):
                     if os.path.isfile(os.path.join(lf, os.path.basename(rf))) or os.path.isdir(os.path.join(lf, os.path.basename(rf))):
-                        self.log.insert('', 'end', values=(tm, action, file, err,))
+                        self.log.set(self.log.get_children()[-1], 3, err)
                         break
             else:
-                self.log.insert('', 'end', values=(tm, action, file, err,))
+                self.log.set(self.log.get_children()[-1], 3, err)
             self.run_button['state'] = 'normal'
+            self.run_button['cursor'] = 'hand2'
+            self.listdir_button['state'] = 'normal'
+            self.listdir_button['cursor'] = 'hand2'
         else:
             self.run_button['state'] = 'disabled'
+            self.run_button['cursor'] = 'arrow'
+            self.listdir_button['state'] = 'disabled'
+            self.listdir_button['cursor'] = 'arrow'
         
         # auto scroll down treeview
         try: self.log.see(self.log.get_children()[-1])

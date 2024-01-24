@@ -17,8 +17,8 @@ from pexpect import EOF, TIMEOUT, popen_spawn
 from PIL import Image, ImageTk
 from pyperclip import copy, paste
 
-__author__ = "Menno vH"
-__version__ = "1.0.4"
+__author__ = "MennovH"
+__version__ = "1.0.5"
 __status__ = "Production"
 
 # hide python console window (.pyw extension breaks functionality)
@@ -44,7 +44,7 @@ def known_hosts():
         for host in tmp_hosts:
             try:
                 if ']:' in host:
-                    hosts.append(host.replace('[', '').replace(']', ''))
+                    hosts.append(host[host.index('['):].replace('[', '').replace(']', ''))
                 elif ip_address(host):
                     hosts.append(f'{host}:22')
             except:
@@ -213,6 +213,7 @@ class windows(tk.Tk):
         self.remote_host_username.bind('<KeyRelease>', self.validate_input)
         self.remote_host_password.bind('<KeyRelease>', self.validate_input)
         self.remote_folder.bind('<KeyRelease>', self.validate_input)
+        self.remote_folder.bind('<<ComboboxSelected>>', self.validate_input)
         self.local_folder.bind('<KeyRelease>', self.validate_local_path)
         self.putty_private_key.bind('<KeyRelease>', self.validate_key_path)
 
@@ -686,7 +687,7 @@ class windows(tk.Tk):
         
         if not param:
             tm = dt.datetime.now().strftime('%H:%M:%S')
-            self.log.insert('', 'end', values=(tm, 'List dir', rf, 'Running',))
+            self.log.insert('', 0, values=(tm, 'List dir', rf, 'Running',))
 
         try: rhp = int(rhp)
         except: pass
@@ -708,7 +709,7 @@ class windows(tk.Tk):
             # start pexpect process
             self.error = ''
             
-            self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp -ls -P {rhp} {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
+            self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp -ls -P {rhp} {un}@{rh}:\"{rf}\"', encoding=encoding, timeout=timeout)
             
             # handle pexpect feedback
             condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory', 'Too many failures',
@@ -727,6 +728,7 @@ class windows(tk.Tk):
                 err
             
             items = []
+            
             with StringIO(self.session.before) as f:
                 lines = f.readlines()
                 for line in lines:
@@ -736,9 +738,11 @@ class windows(tk.Tk):
                             split_line[-1] in ['.', '..']:
                             continue
                         
-                        items.append(rf if split_line[-1] == rf else \
-                            f'{rf.rstrip("/")}/{split_line[-1]}') if rf != "" else \
-                            items.append(split_line[-1])
+                        parsed_line = " ".join(split_line[8:])
+                        if rf != parsed_line:
+                            if len(rf.replace(' ', '')) > 0:
+                                parsed_line = f'{rf}/{parsed_line}'
+                            items.append(parsed_line)
                     except:
                         pass
 
@@ -756,10 +760,10 @@ class windows(tk.Tk):
             self.run_button['state'] = 'disabled'
             self.run_button['cursor'] = 'arrow'
 
-        self.log.set(self.log.get_children()[-1], 3, err)
+        self.log.set(self.log.get_children()[0], 3, err)
         
         # auto scroll down treeview
-        try: self.log.see(self.log.get_children()[-1])
+        try: self.log.see(self.log.get_children()[0])
         except: pass
         self.run_button['text'] = 'Upload item(s)' if action == 'Upload' else 'Download item(s)'
         self.listdir_button['state'] = 'normal'
@@ -824,7 +828,7 @@ class windows(tk.Tk):
                     self.log.insert('', 'end', values=(tm, action, file, 'Aborted',))
 
                     # auto scroll down treeview
-                    try: self.log.see(self.log.get_children()[-1])
+                    try: self.log.see(self.log.get_children()[0])
                     except: pass
                     self.run_button['text'] = 'Upload item(s)'
                     self.run_button['state'] = 'normal'
@@ -840,10 +844,12 @@ class windows(tk.Tk):
             tm = dt.datetime.now().strftime('%H:%M:%S')
             file = os.path.basename(rf) if action == 'Download' else os.path.basename(lf)
 
-            self.log.insert('', 'end', values=(tm, action, file, 'Running',))
+            self.log.insert('', 0, values=(tm, action, file, 'Running',))
             recursive = '-r' if rs else ''
             if action == 'Download':          
-                self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout)
+               # self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout) #original
+                
+                self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:\"\'{rf}\'\" \"{lf}\"', encoding=encoding, timeout=timeout)
             else:
                 self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
             
@@ -866,19 +872,37 @@ class windows(tk.Tk):
                 err
             
             if err in ['0%; EOF', 'Access Denied'] and action == 'Upload':
-                self.log.set(self.log.get_children()[-1], 3, 'Validating')
+                self.log.set(self.log.get_children()[0], 3, 'Validating')
                 validate_transfer = self.listdir(param='list')
                 if Path(lf).name in validate_transfer:
                     err = '100%'
 
             if action == 'Download' and err == '100%':
-                self.log.set(self.log.get_children()[-1], 3, 'Validating')
+                self.log.set(self.log.get_children()[0], 3, 'Validating')
                 for _ in range(100):
-                    if os.path.isfile(os.path.join(lf, os.path.basename(rf))) or os.path.isdir(os.path.join(lf, os.path.basename(rf))):
-                        self.log.set(self.log.get_children()[-1], 3, err)
+                    if os.path.isfile(os.path.join(lf, os.path.basename(rf))) or \
+                        os.path.isfile(os.path.join(lf, f"'{os.path.basename(rf)}'")) or \
+                        os.path.isdir(os.path.join(lf, os.path.basename(rf))):
+                        self.log.set(self.log.get_children()[0], 3, err)
                         break
+                if os.path.isfile(os.path.join(lf, f"'{os.path.basename(rf)}'")):
+                    ext = os.path.splitext(os.path.basename(rf))[1]
+                    for i in range(100):
+                        if i == 0:
+                            if not os.path.isfile(os.path.join(lf, os.path.basename(rf))):
+                                os.rename(
+                                    os.path.join(lf, f"'{os.path.basename(rf)}'"),
+                                    os.path.join(lf, os.path.basename(rf))
+                                )
+                        else:
+                            if not os.path.isfile(os.path.join(lf, os.path.basename(f'{rf}-{i}'))):
+                                os.rename(
+                                    os.path.join(lf, f"'{os.path.basename(rf)}'"),
+                                    os.path.join(lf, os.path.basename(rf.replace(ext, f'-{i}{ext}')))
+                                )
+
             else:
-                self.log.set(self.log.get_children()[-1], 3, err)
+                self.log.set(self.log.get_children()[0], 3, err)
             self.run_button['state'] = 'normal'
             self.run_button['cursor'] = 'hand2'
             self.listdir_button['state'] = 'normal'
@@ -890,7 +914,7 @@ class windows(tk.Tk):
             self.listdir_button['cursor'] = 'arrow'
         
         # auto scroll down treeview
-        try: self.log.see(self.log.get_children()[-1])
+        try: self.log.see(self.log.get_children()[0])
         except: pass
         self.run_button['text'] = 'Upload item(s)' if action == 'Upload' else 'Download item(s)'
         self.update()

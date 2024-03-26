@@ -18,7 +18,7 @@ from PIL import Image, ImageTk
 from pyperclip import copy, paste
 
 __author__ = "MennovH"
-__version__ = "1.0.5"
+__version__ = "1.0.7"
 __status__ = "Production"
 
 # hide python console window (.pyw extension breaks functionality)
@@ -846,12 +846,13 @@ class windows(tk.Tk):
 
             self.log.insert('', 0, values=(tm, action, file, 'Running',))
             recursive = '-r' if rs else ''
-            if action == 'Download':          
-               # self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout) #original
-                
-                self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:\"\'{rf}\'\" \"{lf}\"', encoding=encoding, timeout=timeout)
+            if action == 'Download':
+                # self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:{rf} \"{lf}\"', encoding=encoding, timeout=timeout) #original
+                # self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} {un}@{rh}:\"\'{rf}\'\" \"{lf}\"', encoding=encoding, timeout=timeout)
+                self.session = popen_spawn.PopenSpawn(str(self.pscp) + " " + str(kp)  + " -scp " + str(recursive) + " -P " + str(rhp) + " " + str(un) + "@" + str(rh)  + ":" + str(rf) + " " + str(lf).replace("\'",""), encoding=encoding, timeout=timeout)
             else:
-                self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} \"{lf}\" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
+                # self.session = popen_spawn.PopenSpawn(f'"{self.pscp}" {kp} -scp {recursive} -P {rhp} "{lf}" {un}@{rh}:{rf}', encoding=encoding, timeout=timeout)
+                self.session = popen_spawn.PopenSpawn(str(self.pscp) + " " + str(kp)  + " -scp " + str(recursive) + " -P " + str(rhp) + " " + lf.replace("\'","") + " " + str(un) + "@" + str(rh) + ":" + str(rf), encoding=encoding, timeout=timeout)
             
             # handle pexpect feedback
             condition_list = ['Connection refused', 'Access denied', 'FATAL ERROR', 'No such file or directory',
